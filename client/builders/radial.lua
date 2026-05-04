@@ -126,7 +126,7 @@ function UI_Radial(fn)
     if #watchers > 0 then Reactive.attach(id, watchers) end
     Stack.push({ id = id, type = 'radial' })
     Bridge.send('open', { menu = 'radial', id = id, data = { center_label = meta.center_label, buttons = buttons } })
-    if #watchers > 0 then Reactive.evaluate(id); Reactive.startTicking(id) end
+    if #watchers > 0 then Reactive.startTicking(id) end
 end
 
 local _radialBuildCleanup = {}
@@ -152,7 +152,7 @@ function UI_Radial_Build(fn)
             if #watchers > 0 then Reactive.attach(id, watchers) end
             Stack.push({ id = id, type = 'radial' })
             Bridge.send('open', { menu = 'radial', id = id, data = { center_label = meta.center_label, buttons = buttons } })
-            if #watchers > 0 then Reactive.evaluate(id); Reactive.startTicking(id) end
+            if #watchers > 0 then Reactive.startTicking(id) end
         end,
         close = function()
             if not _activeId then return end

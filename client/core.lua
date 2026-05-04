@@ -46,12 +46,15 @@ rawset(LastMenu, '_genId', GenerateMenuId)
 ---@return string
 local function _stableId(menuId, label, kind, used)
     local raw = type(label) == 'string' and label ~= '' and label or kind
-    local base = raw:lower()
-        :gsub('[^%w%s]', '')
-        :gsub('%s+',     '_')
-        :gsub('_+',      '_')
-        :gsub('^_+',     '')
-        :gsub('_+$',     '')
+    local lower = raw:lower()
+    local base
+    if lower:find('[^%w%s]') then
+        -- Slow path: strip special chars, dedup underscores, trim edges.
+        base = lower:gsub('[^%w%s]', ''):gsub('%s+', '_'):gsub('_+', '_'):gsub('^_+', ''):gsub('_+$', '')
+    else
+        -- Fast path: only alphanumeric + spaces (covers ~99% of labels).
+        base = lower:gsub('%s+', '_')
+    end
     if base == '' then base = 'item' end
     local n = (used[base] or 0) + 1
     used[base] = n
@@ -93,20 +96,22 @@ local function _safeBuilder(name, fn, b, menuId)
 end
 rawset(LastMenu, '_safeBuilder', _safeBuilder)
 
+local function _isCallable(v)
+    local t = type(v)
+    if t == 'function' or t == 'funcref' then return true end
+    local mt = t == 'table' and getmetatable(v)
+    return mt and type(mt.__call) == 'function'
+end
+
 -- Returns a resolveField(cb_id, val, field, expectedType, default, interval) closure
 -- bound to the given watchers array. Callable values register reactive watchers;
 -- static values are returned directly.
 ---@param  watchers table[]
 ---@return fun(cb_id: string, val: any, field: string, expectedType: string, default: any, interval: integer): any
 local function _makeResolver(watchers)
-    local function isCallable(v)
-        if type(v) == 'function' then return true end
-        local mt = type(v) == 'table' and getmetatable(v)
-        return mt and type(mt.__call) == 'function'
-    end
     return function(cb_id, val, field, expectedType, default, interval)
         if val == nil then return default end
-        if isCallable(val) then
+        if _isCallable(val) then
             local ok, result = pcall(val)
             if ok and type(result) == expectedType then
                 watchers[#watchers + 1] = { id = cb_id, field = field, fn = val,

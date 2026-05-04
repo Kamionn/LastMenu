@@ -257,7 +257,7 @@ local function _buildContext(id, fn)
 
     function b:stat(label, valueOrOpts, maxOrNil, optsOrNil)
         local opts, value, max
-        if type(valueOrOpts) == 'number' or type(valueOrOpts) == 'function' then
+        if type(valueOrOpts) == 'number' or type(valueOrOpts) == 'function' or type(valueOrOpts) == 'funcref' then
             value = valueOrOpts; max = maxOrNil; opts = optsOrNil or {}
         else
             opts = valueOrOpts or {}; value = opts.value; max = opts.max
@@ -381,7 +381,8 @@ local function _buildContext(id, fn)
         local cb_id  = opts.id or sid(label, 'back')
         local userCb = opts.cb
         Bridge.onCallback(cb_id, function()
-            if type(userCb) == 'function' then
+            local t = type(userCb)
+            if t == 'function' or t == 'funcref' then
                 local ok, err = pcall(userCb)
                 if not ok then print('[LastMenu] back() cb error: ' .. tostring(err)) end
             end
@@ -439,7 +440,7 @@ local function _openContext(id, fn)
     if #watchers > 0 then Reactive.attach(id, watchers) end
     Stack.push({ id = id, type = 'context', nav = meta.nav, cancelable = meta.cancelable })
     Bridge.send('open', { menu = 'context', id = id, data = { meta = meta, items = items } })
-    if #watchers > 0 then Reactive.evaluate(id); Reactive.startTicking(id) end
+    if #watchers > 0 then Reactive.startTicking(id) end
 end
 
 -- ── Shared update logic ───────────────────────────────────────────────────────
@@ -454,7 +455,6 @@ local function _updateContext(id, fn)
     local meta, items, watchers = _buildContext(id, fn)
     if #watchers > 0 then
         Reactive.attach(id, watchers)
-        Reactive.evaluate(id)
         Reactive.startTicking(id)
     end
     -- Sending 'open' with an existing ID replaces the NUI entry (App.svelte deduplicates by id).
