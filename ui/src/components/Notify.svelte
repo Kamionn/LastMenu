@@ -2,19 +2,12 @@
     import '../styles/Notify.css'
     import { CircleCheck, CircleX, TriangleAlert, Info } from 'lucide-svelte'
     import LucideIcon from './LucideIcon.svelte'
-    import { onMount } from 'svelte'
 
-    let { onCallback = null, uiSounds = false, defaultDuration = 4000 } = $props()
+    let { onCallback = null, uiSounds = false, defaultDuration = 4000, notifyX = 'right', notifyY = 'bottom' } = $props()
 
-    let toasts  = $state([])
-    let posX    = $state('right')
-    let posY    = $state('bottom')
-
-    onMount(() => {
-        const style = getComputedStyle(document.documentElement)
-        posX = style.getPropertyValue('--ui-notify-position-x').trim() || 'right'
-        posY = style.getPropertyValue('--ui-notify-position-y').trim() || 'bottom'
-    })
+    let toasts = $state([])
+    let posX   = $derived(notifyX ?? 'right')
+    let posY   = $derived(notifyY ?? 'bottom')
 
     export function addNotify(data) {
         // duration=0 → persistent (no auto-dismiss, no timer bar)

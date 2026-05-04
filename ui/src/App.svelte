@@ -201,7 +201,7 @@
     })
 </script>
 
-<Notify bind:this={notifyRef} onCallback={sendCallback} uiSounds={userSettings.uiSounds} defaultDuration={userSettings.notifyDuration} />
+<Notify bind:this={notifyRef} onCallback={sendCallback} uiSounds={userSettings.uiSounds} defaultDuration={userSettings.notifyDuration} notifyX={userSettings.notifyX} notifyY={userSettings.notifyY} />
 
 <!-- Context menus: rendered persistently so banner GIFs don't restart on sub-menu open/close.
      Each menu in the stack keeps its component alive; only the top one is active (visible + interactive). -->
