@@ -10,6 +10,7 @@
     import Target       from './components/Target.svelte'
     import UserSettings from './components/UserSettings.svelte'
     import { loadSettings, applyTheme } from './utils/theme'
+    import { applyViewportScale } from './utils/viewport'
 
     let stack     = $state([])
     let topMenu   = $derived(stack.length > 0 ? stack[stack.length - 1] : null)
@@ -20,6 +21,7 @@
 
     $effect(() => {
         applyTheme(userSettings)
+        applyViewportScale()
         localStorage.setItem('lm-settings', JSON.stringify(userSettings))
     })
 
@@ -186,6 +188,7 @@
     }
 
     onMount(() => {
+        applyViewportScale()
         fetch(`https://LastMenu/ready`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
