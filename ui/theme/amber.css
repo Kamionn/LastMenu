@@ -1,0 +1,209 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   LastMenu — Amber Theme
+   Vintage amber terminal aesthetic. Monospace fonts, razor-sharp corners,
+   warm amber glow on near-black. Demonstrates every available design token.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  GLOBAL COLOURS                                                     │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-accent:            #f59e0b;
+    --ui-accent-dim:        #d97706;
+    --ui-accent-text:       #0a0600;
+
+    --ui-success:           #86efac;
+    --ui-warning:           #fb923c;
+    --ui-error:             #fca5a5;
+    --ui-info:              #7dd3fc;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  TYPOGRAPHY — monospace terminal                                    │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-font-body:         'Consolas', 'Courier New', 'Lucida Console', monospace;
+    --ui-font-heading:      'Consolas', 'Courier New', 'Lucida Console', monospace;
+
+    --ui-icon-size:         14px;
+    --ui-icon-stroke:       2;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Layout                                              │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-banner-height: 72px;
+    --ui-ctx-banner-font-size: 12px;
+    --ui-ctx-gap:           0px;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Backgrounds                                         │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-bg:            rgba(10, 8, 2, 0.98);
+    --ui-ctx-bg-title:      rgba(245, 158, 11, 0.05);
+    --ui-ctx-bg-hover:      rgba(245, 158, 11, 0.10);
+    --ui-ctx-bg-active:     rgba(245, 158, 11, 0.17);
+    --ui-ctx-bg-focus:      rgba(245, 158, 11, 0.10);
+    --ui-ctx-bg-search:     rgba(245, 158, 11, 0.04);
+    --ui-ctx-bg-input:      rgba(245, 158, 11, 0.05);
+    --ui-ctx-bg-step-btn:   rgba(245, 158, 11, 0.08);
+    --ui-ctx-bg-preview:    rgba(8, 6, 1, 0.99);
+    --ui-ctx-bg-popover:    rgba(12, 9, 2, 0.99);
+    --ui-ctx-bg-pager:      rgba(245, 158, 11, 0.03);
+    --ui-ctx-bg-accordion:  rgba(245, 158, 11, 0.04);
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Borders & Radii — razor sharp                      │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-border:        rgba(245, 158, 11, 0.20);
+    --ui-ctx-border-item:   rgba(245, 158, 11, 0.25);
+    --ui-ctx-border-focus:  rgba(245, 158, 11, 0.60);
+    --ui-ctx-border-sep:    rgba(245, 158, 11, 0.10);
+
+    --ui-ctx-radius:        0px;
+    --ui-ctx-radius-item:   0px;
+    --ui-ctx-radius-xs:     0px;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Text                                                │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-text:          rgba(251, 220, 120, 0.88);
+    --ui-ctx-text-dim:      rgba(200, 155, 60, 0.62);
+    --ui-ctx-text-muted:    rgba(150, 110, 30, 0.46);
+    --ui-ctx-text-disabled: rgba(100, 75, 20, 0.28);
+    --ui-ctx-text-title:    #fef3c7;
+    --ui-ctx-icon-color:    rgba(245, 158, 11, 0.38);
+    --ui-ctx-icon-hover:    #f59e0b;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Shadows                                             │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-shadow:        0 0 0 1px rgba(245,158,11,0.20), 0 16px 48px rgba(0,0,0,0.92), 0 0 80px rgba(245,158,11,0.03);
+    --ui-ctx-shadow-preview:0 8px 32px rgba(0,0,0,0.80);
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Animation — snappier                               │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-anim-open:     140ms;
+    --ui-ctx-anim-close:    100ms;
+    --ui-ctx-anim-item:     60ms;
+    --ui-ctx-anim-toggle:   160ms;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  COOLDOWN BAR                                                       │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-cooldown-bar-height: 2px;
+    --ui-cooldown-bar-color:  #f59e0b;
+    --ui-cooldown-bar-opacity:0.7;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  TABS                                                               │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-tab-indicator:     #f59e0b;
+    --ui-tab-active-text:   #f59e0b;
+    --ui-tab-inactive-text: rgba(200, 155, 60, 0.55);
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  STATS                                                              │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-stat-anim:         400ms;
+    --ui-stat-high:         #86efac;
+    --ui-stat-mid:          #fb923c;
+    --ui-stat-low:          #fca5a5;
+    --ui-stat-bar-height:   3px;
+    --ui-stat-bar-radius:   0px;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  SLIDER                                                             │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-slider-height:     3px;
+    --ui-slider-thumb:      10px;
+    --ui-slider-width:      88px;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  TOGGLE                                                             │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-toggle-off:        rgba(245, 158, 11, 0.14);
+    --ui-toggle-on:         #f59e0b;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONFIRM HOLD                                                       │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-hold-color:        #f59e0b;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  SCROLLBAR                                                          │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-scroll-thumb:      rgba(245, 158, 11, 0.24);
+    --ui-scroll-width:      2px;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  NOTIFICATIONS                                                      │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-notify-width:      300px;
+    --ui-notify-gap:        6px;
+    --ui-notify-offset:     16px;
+    --ui-notify-padding:    10px;
+    --ui-notify-badge-size: 28px;
+    --ui-notify-dismiss-size: 16px;
+    --ui-notify-timer-height: 2px;
+    --ui-notify-timer-bg:   rgba(245, 158, 11, 0.08);
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  PROGRESS BAR                                                       │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-progress-width:    380px;
+    --ui-progress-height:   4px;
+    --ui-progress-bg:       rgba(245, 158, 11, 0.10);
+    --ui-progress-fill:     #f59e0b;
+    --ui-progress-radius:   0px;
+    --ui-progress-shadow:   0 0 0 1px rgba(245,158,11,0.16), 0 6px 24px rgba(0,0,0,0.75);
+    --ui-progress-glow:     0 0 14px rgba(245, 158, 11, 0.55);
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  RADIAL MENU                                                        │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-radial-backdrop-bg:         rgba(0, 0, 0, 0.65);
+    --ui-radial-container-size:      340px;
+    --ui-radial-center-size:         80px;
+    --ui-radial-icon-color:          rgba(245, 158, 11, 0.60);
+    --ui-radial-arc-bg:              rgba(10, 8, 2, 0.88);
+    --ui-radial-arc-stroke:          rgba(245, 158, 11, 0.22);
+    --ui-radial-arc-disabled-bg:     rgba(5, 4, 1, 0.55);
+    --ui-radial-arc-disabled-stroke: rgba(245, 158, 11, 0.05);
+    --ui-radial-ring-bg:             rgba(245, 158, 11, 0.04);
+    --ui-radial-ring-stroke:         rgba(245, 158, 11, 0.20);
+    --ui-radial-ring-inner-bg:       rgba(6, 5, 1, 0.82);
+    --ui-radial-ring-inner-stroke:   rgba(245, 158, 11, 0.10);
+    --ui-radial-label-stroke:        rgba(5, 3, 0, 0.92);
+    --ui-radial-dot-bg:              rgba(245, 158, 11, 0.24);
+    --ui-radial-dot-border:          rgba(245, 158, 11, 0.50);
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  BACKDROP                                                           │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-backdrop-bg:       rgba(5, 3, 0, 0.72);
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  ALERT MODAL                                                        │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-alert-width:       340px;
+    --ui-alert-icon-ring-size: 48px;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  INPUT FORM                                                         │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-input-width:       340px;
+    --ui-input-bg:          rgba(8, 6, 1, 0.99);
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  TARGET SYSTEM                                                      │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-target-min-width:       200px;
+    --ui-target-max-width:       260px;
+    --ui-target-bg:              rgba(8, 6, 1, 0.98);
+    --ui-target-shadow:          0 0 0 1px rgba(245,158,11,0.18), 0 8px 32px rgba(0,0,0,0.88);
+    --ui-target-banner-height:   72px;
+    --ui-target-reticle-size:    38px;
+    --ui-target-reticle-bg:      rgba(5, 3, 0, 0.60);
+    --ui-target-reticle-border:  rgba(245, 158, 11, 0.45);
+    --ui-target-hint-text:       rgba(245, 158, 11, 0.65);
+}

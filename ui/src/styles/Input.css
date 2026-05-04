@@ -1,0 +1,115 @@
+/* Input.svelte — input form modal styles. */
+
+.input-wrap {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: var(--ui-modal-align, center);
+    justify-content: center;
+    padding: 40px 0;
+    z-index: 1000;
+    animation: fadeIn var(--ui-ctx-anim-open,150ms) ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.input-modal {
+    width: var(--ui-input-width, 340px);
+    background: var(--ui-input-bg, rgba(15, 15, 28, 0.97));
+    border: 1px solid var(--ui-ctx-border, rgba(255,255,255,0.07));
+    border-top: 2px solid var(--ui-accent, #e94560);
+    border-radius: var(--ui-ctx-radius, 8px);
+    box-shadow: var(--ui-ctx-shadow, 0 20px 60px rgba(0,0,0,0.7));
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.input-title {
+    font-size: var(--ui-font-size-base, 13px);
+    font-weight: 700;
+    color: var(--ui-ctx-text-title, #fff);
+    letter-spacing: 0.03em;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--ui-ctx-border-sep, rgba(255,255,255,0.06));
+    margin-bottom: 2px;
+}
+
+.input-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.field-label {
+    color: var(--ui-ctx-text-dim, rgba(255,255,255,0.45));
+    font-size: var(--ui-font-size-sm, 11px);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.field-input {
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--ui-ctx-bg-input, rgba(255,255,255,0.05));
+    border: 1px solid var(--ui-ctx-border-item, rgba(255,255,255,0.10));
+    border-radius: var(--ui-ctx-radius-item, 5px);
+    color: var(--ui-ctx-text, rgba(255,255,255,0.82));
+    font-size: var(--ui-font-size-base, 13px);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color var(--ui-ctx-anim-item,120ms) ease;
+}
+
+.field-input:focus {
+    border-color: var(--ui-accent, #e94560);
+    background: var(--ui-ctx-bg-hover, rgba(255,255,255,0.08));
+}
+
+.field-input.field-error { border-color: var(--ui-error, #f87171); }
+
+.field-err-msg {
+    font-size: var(--ui-font-size-xs, 10px);
+    color: var(--ui-error, #f87171);
+    margin-top: 2px;
+}
+
+.input-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: var(--ui-ctx-radius-item, 5px);
+    font-size: var(--ui-font-size-base, 13px);
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--ui-ctx-anim-item,120ms) ease;
+}
+
+.btn-confirm {
+    background: var(--ui-accent, #e94560);
+    color: var(--ui-accent-text, #fff);
+}
+.btn-confirm:hover { filter: brightness(1.15); }
+
+.btn-cancel {
+    background: var(--ui-ctx-bg-hover, rgba(255,255,255,0.08));
+    color: var(--ui-ctx-text, rgba(255,255,255,0.82));
+    border: 1px solid var(--ui-ctx-border-item, rgba(255,255,255,0.10));
+}
+.btn-cancel:hover { background: var(--ui-ctx-bg-active, rgba(255,255,255,0.13)); }

@@ -1,0 +1,28 @@
+/* ContextTabs.svelte — tab bar styles. */
+
+.ctx-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--ui-ctx-border);
+    background: var(--ui-ctx-bg-title);
+    padding: 0 4px;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.ctx-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 8px 12px;
+    font-size: 12px; font-weight: 600;
+    color: var(--ui-ctx-text-dim);
+    background: none; border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color var(--ui-ctx-anim-item,80ms), border-color var(--ui-ctx-anim-item,80ms);
+    white-space: nowrap;
+}
+.tab-btn:hover { color: var(--ui-ctx-text) }
+.tab-btn.is-active {
+    color: var(--ui-tab-active-text, var(--ui-accent));
+    border-bottom-color: var(--ui-tab-indicator, var(--ui-accent));
+}

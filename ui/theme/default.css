@@ -1,0 +1,250 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   LastMenu — Default Theme
+   To customize: override only the variables you need in your own CSS file
+   and reference it in your fxmanifest.lua files{} after this file.
+   Every variable is documented; search for the section you're interested in.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── NUI Reset ────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: transparent; overflow: hidden; line-height: var(--ui-line-spacing, 1.2); }
+button { border: none; background: none; cursor: pointer; font: inherit; }
+svg.lucide { stroke-width: var(--ui-icon-stroke, 1.75); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — All customisable variables in one place
+   ════════════════════════════════════════════════════════════════════════════ */
+:root {
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  GLOBAL COLOURS                                                     │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-accent:            #e94560;              /* Primary accent (active buttons, toggle ON, badges…) */
+    --ui-accent-dim:        #c73652;              /* Darker accent variant (hover states) */
+    --ui-accent-text:       #ffffff;              /* Text on accent-coloured backgrounds */
+
+    --ui-success:           #4ade80;              /* Success colour (notify, high stat bar) */
+    --ui-warning:           #fb923c;              /* Warning colour */
+    --ui-error:             #f87171;              /* Error / low-stat colour */
+    --ui-info:              #60a5fa;              /* Info colour */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  TYPOGRAPHY                                                         │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-font-body:         ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --ui-font-heading:      'Segoe UI', ui-sans-serif, system-ui, sans-serif; /* Used for menu titles */
+
+    /* User font-scale — set at runtime via JS: --ui-font-scale = fontSize/100.
+       Override this variable to scale all text across every LastMenu interface. */
+    --ui-font-scale:        1;
+
+    --ui-font-size-xs:      calc(10px * var(--ui-font-scale));
+    --ui-font-size-sm:      calc(11px * var(--ui-font-scale));
+    --ui-font-size-base:    calc(13px * var(--ui-font-scale));
+    --ui-font-size-md:      calc(14px * var(--ui-font-scale));
+    --ui-font-size-lg:      calc(16px * var(--ui-font-scale));
+    --ui-font-size-xl:      calc(18px * var(--ui-font-scale));
+
+    --ui-icon-size:         16px;
+    --ui-icon-stroke:       1.75;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  ACCESSIBILITY / GAMEPLAY                                           │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-line-spacing:      1.2;                    /* Line height for all text (1.0–2.0) */
+    --ui-hover-delay:       0ms;                    /* Delay before hover state activates (motor accessibility) */
+    --ui-blur:              0px;                    /* Backdrop blur radius — set to 8px by applyTheme when blurEffects=true */
+    --ui-anim-play:         running;                /* animation-play-state for ambient/infinite animations — set to paused by applyTheme in perfMode */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Layout                                              │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-top:           72px;                 /* Distance from the top of the screen */
+    --ui-ctx-left:          16px;                 /* Distance from the left of the screen */
+    --ui-ctx-width:         320px;                /* Menu panel width */
+    --ui-ctx-max-height:    calc(100vh - 120px);  /* Maximum menu height */
+    --ui-ctx-banner-height: 100px;                /* Banner image height */
+    --ui-ctx-item-height:   40px;                 /* Minimum item row height */
+    --ui-ctx-preview-width: 240px;                /* Hover preview panel width */
+    --ui-ctx-gap:           1px;                  /* Gap between items */
+    --ui-ctx-banner-font-size: 17px;              /* Banner overlay title font size */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Backgrounds                                         │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-bg:            rgba(12, 12, 22, 0.97); /* Main menu background */
+    --ui-ctx-bg-title:      rgba(255,255,255,0.02); /* Title/header zone background */
+    --ui-ctx-bg-hover:      rgba(255,255,255,0.08); /* Item hover */
+    --ui-ctx-bg-active:     rgba(255,255,255,0.13); /* Item click */
+    --ui-ctx-bg-focus:      rgba(255,255,255,0.08); /* Keyboard focus */
+    --ui-ctx-bg-search:     rgba(255,255,255,0.04); /* Search bar background */
+    --ui-ctx-bg-input:      rgba(255,255,255,0.05); /* Inline input background */
+    --ui-ctx-bg-step-btn:   rgba(255,255,255,0.06); /* Stepper −/+ button background */
+    --ui-ctx-bg-preview:    rgba(8, 8, 18, 0.98);   /* Hover preview panel background */
+    --ui-ctx-bg-popover:    rgba(15, 15, 28, 0.99); /* Color picker popover background */
+    --ui-ctx-bg-pager:      rgba(255,255,255,0.03); /* Pagination bar background */
+    --ui-ctx-bg-accordion:  rgba(255,255,255,0.02); /* Accordion header background */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Borders & Radii                                     │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-border:        rgba(255,255,255,0.07); /* Main menu border */
+    --ui-ctx-border-item:   rgba(255,255,255,0.10); /* Item borders (stepper, input) */
+    --ui-ctx-border-focus:  rgba(255,255,255,0.18); /* Focused input border */
+    --ui-ctx-border-sep:    rgba(255,255,255,0.06); /* Separator line */
+    --ui-ctx-radius:        8px;                    /* Panel corner radius */
+    --ui-ctx-radius-item:   5px;                    /* Item corner radius */
+    --ui-ctx-radius-xs:     3px;                    /* Extra-small element radius */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Text                                                │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-text:          rgba(255,255,255,0.82); /* Normal item text */
+    --ui-ctx-text-dim:      rgba(255,255,255,0.45); /* Secondary text (description, hint) */
+    --ui-ctx-text-muted:    rgba(255,255,255,0.28); /* Muted text (section header, cooldown) */
+    --ui-ctx-text-disabled: rgba(255,255,255,0.22); /* Disabled item text */
+    --ui-ctx-text-title:    #ffffff;                /* Menu title text */
+    --ui-ctx-icon-color:    rgba(255,255,255,0.35); /* Icon default colour */
+    --ui-ctx-icon-hover:    var(--ui-accent);       /* Icon colour on hover */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Shadows                                             │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-shadow:        0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.03);
+    --ui-ctx-shadow-preview:0 10px 40px rgba(0,0,0,0.65);
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONTEXT MENU — Animation durations                                 │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-ctx-anim-open:     220ms;                  /* Menu open animation duration */
+    --ui-ctx-anim-close:    180ms;                  /* Menu close animation duration */
+    --ui-ctx-anim-item:     80ms;                   /* Item hover transition */
+    --ui-ctx-anim-toggle:   200ms;                  /* Toggle / checkbox animation */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  COOLDOWN BAR                                                       │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-cooldown-bar-height: 2px;                  /* Height of the cooldown progress bar */
+    --ui-cooldown-bar-color:  var(--ui-accent);     /* Colour of the cooldown bar fill */
+    --ui-cooldown-bar-opacity:0.6;                  /* Opacity of the cooldown bar */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  TABS                                                               │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-tab-indicator:     var(--ui-accent);       /* Active tab underline colour */
+    --ui-tab-active-text:   var(--ui-accent);       /* Active tab text colour */
+    --ui-tab-inactive-text: var(--ui-ctx-text-dim); /* Inactive tab text colour */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  STATS (progress bars)                                              │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-stat-anim:         600ms;                  /* Stat bar fill animation duration */
+    --ui-stat-high:         #4ade80;                /* Stat > 60% */
+    --ui-stat-mid:          #fb923c;                /* Stat 30–60% */
+    --ui-stat-low:          #f87171;                /* Stat < 30% */
+    --ui-stat-bar-height:   4px;                    /* Stat bar thickness */
+    --ui-stat-bar-radius:   2px;
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  SLIDER                                                             │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-slider-height:     4px;                    /* Track thickness */
+    --ui-slider-thumb:      12px;                   /* Thumb size */
+    --ui-slider-width:      90px;                   /* Track width */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  TOGGLE (switch)                                                    │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-toggle-width:      32px;
+    --ui-toggle-height:     18px;
+    --ui-toggle-off:        rgba(255,255,255,0.12); /* Toggle OFF background */
+    --ui-toggle-on:         var(--ui-accent);       /* Toggle ON background */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  CONFIRM HOLD (hold-to-confirm button)                              │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-hold-duration:     1500ms;                 /* Hold duration (visual fill only) */
+    --ui-hold-color:        var(--ui-accent);       /* Fill colour during hold */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  SCROLLBAR                                                          │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-scroll-thumb:      rgba(255,255,255,0.14); /* Scrollbar thumb colour */
+    --ui-scroll-width:      3px;                    /* Scrollbar width */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  NOTIFICATIONS                                                      │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-notify-width:      320px;
+    --ui-notify-gap:        8px;
+    --ui-notify-offset:     20px;                  /* Distance from screen edge (all sides) */
+    --ui-notify-padding:    12px;                  /* Toast body inner padding */
+    --ui-notify-badge-size: 32px;                  /* Icon badge dimensions */
+    --ui-notify-dismiss-size: 18px;                /* Dismiss button dimensions */
+    --ui-notify-timer-height: 3px;                 /* Progress timer bar height */
+    --ui-notify-timer-bg:   rgba(255,255,255,0.05); /* Timer bar track background */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  PROGRESS BAR (global progress bar overlay)                         │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-progress-width:    420px;                 /* Progress container width */
+    --ui-progress-height:   6px;
+    --ui-progress-bg:       rgba(255,255,255,0.1);
+    --ui-progress-fill:     var(--ui-accent);
+    --ui-progress-radius:   9999px;
+    --ui-progress-shadow:   0 8px 32px rgba(0,0,0,0.5); /* Container drop shadow */
+    --ui-progress-glow:     0 0 8px color-mix(in srgb, var(--ui-accent) 50%, transparent); /* Fill bar glow */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  RADIAL MENU                                                        │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-radial-size:       220px;
+    --ui-radial-icon-size:  24px;
+    --ui-radial-bg:         rgba(12,12,22,0.95);
+    --ui-radial-item-size:  72px;
+    --ui-radial-backdrop-bg:         rgba(0, 0, 0, 0.48);         /* Overlay behind radial wheel */
+    --ui-radial-container-size:      340px;                        /* SVG container dimensions */
+    --ui-radial-center-size:         84px;                         /* Center circle diameter */
+    --ui-radial-icon-color:          rgba(255,255,255,0.55);       /* Sector icon colour (idle) */
+    --ui-radial-arc-bg:              rgba(15, 15, 30, 0.78);       /* Arc segment fill */
+    --ui-radial-arc-stroke:          rgba(255,255,255,0.12);       /* Arc segment border */
+    --ui-radial-arc-disabled-bg:     rgba(8, 8, 20, 0.35);        /* Disabled arc fill */
+    --ui-radial-arc-disabled-stroke: rgba(255,255,255,0.03);       /* Disabled arc border */
+    --ui-radial-ring-bg:             rgba(255,255,255,0.02);       /* Inner ring fill */
+    --ui-radial-ring-stroke:         rgba(255,255,255,0.12);       /* Inner ring border */
+    --ui-radial-ring-inner-bg:       rgba(10,10,24,0.72);          /* Innermost ring fill */
+    --ui-radial-ring-inner-stroke:   rgba(255,255,255,0.07);       /* Innermost ring border */
+    --ui-radial-label-stroke:        rgba(0,0,0,0.8);              /* SVG text outline for sector labels */
+    --ui-radial-dot-bg:              rgba(255,255,255,0.15);       /* Center pulse dot fill */
+    --ui-radial-dot-border:          rgba(255,255,255,0.3);        /* Center pulse dot border */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  BACKDROP (modal overlays)                                          │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-backdrop-bg:       rgba(0, 0, 0, 0.55);               /* Semi-transparent overlay behind Alert / Input */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  ALERT MODAL                                                        │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-alert-width:       340px;                              /* Alert dialog width */
+    --ui-alert-icon-ring-size: 52px;                            /* Type icon ring diameter */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  INPUT FORM                                                         │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-input-width:       340px;                              /* Input form width */
+    --ui-input-bg:          rgba(15, 15, 28, 0.97);            /* Input form background (slightly deeper than menu bg) */
+
+    /* ┌─────────────────────────────────────────────────────────────────────┐
+       │  TARGET SYSTEM                                                      │
+       └─────────────────────────────────────────────────────────────────────┘ */
+    --ui-target-min-width:       220px;                         /* Action panel minimum width */
+    --ui-target-max-width:       280px;                         /* Action panel maximum width */
+    --ui-target-bg:              rgba(10, 10, 20, 0.97);        /* Action panel background */
+    --ui-target-shadow:          0 8px 32px rgba(0,0,0,0.7);   /* Action panel drop shadow */
+    --ui-target-banner-height:   80px;                          /* Target banner image height */
+    --ui-target-reticle-size:    40px;                          /* Crosshair ring diameter */
+    --ui-target-reticle-bg:      rgba(0,0,0,0.45);             /* Crosshair ring background */
+    --ui-target-reticle-border:  rgba(255,255,255,0.25);        /* Crosshair ring border */
+    --ui-target-hint-text:       rgba(255,255,255,0.55);        /* Hint/label text colour */
+}

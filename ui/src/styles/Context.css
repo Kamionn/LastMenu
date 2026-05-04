@@ -1,0 +1,125 @@
+/* Context.svelte — layout + animation styles.
+   Extracted from the component <style> block so the .svelte file stays lean.
+   All class names use unique ctx-/ps- prefixes — safe as global CSS. */
+
+/* ── Open animations ──────────────────────────────────────────────────── */
+/* CEF fix: start hidden, apply anim-ready after one RAF in onMount so CEF
+   has a paint cycle before the animation begins — prevents the "no animation"
+   bug caused by CEF skipping keyframes on the very first frame.              */
+@keyframes ctx-slide-left  { from { opacity:0; transform:translateX(-24px) } to { opacity:1; transform:none } }
+@keyframes ctx-slide-right { from { opacity:0; transform:translateX( 24px) } to { opacity:1; transform:none } }
+@keyframes ctx-fade        { from { opacity:0 }                              to { opacity:1 } }
+@keyframes ctx-scale       { from { opacity:0; transform:translateY(-8px) scale(.96) } to { opacity:1; transform:none } }
+
+/* Default: invisible until anim-ready is added by onMount RAF */
+.ctx-wrap { opacity:0; will-change:transform,opacity }
+
+.ctx-wrap.anim-ready                 { animation: ctx-slide-left  var(--ui-ctx-anim-open,220ms) cubic-bezier(0.2,0,0,1) both }
+.ctx-wrap.anim-ready.anim-slideRight { animation: ctx-slide-right var(--ui-ctx-anim-open,220ms) cubic-bezier(0.2,0,0,1) both }
+.ctx-wrap.anim-ready.anim-fade       { animation: ctx-fade        var(--ui-ctx-anim-open,180ms) ease both }
+.ctx-wrap.anim-ready.anim-scale      { animation: ctx-scale       var(--ui-ctx-anim-open,200ms) cubic-bezier(0.2,0,0,1) both }
+.ctx-wrap.anim-ready.anim-none       { animation:none; opacity:1 }
+
+/* ── Close animations ─────────────────────────────────────────────────── */
+@keyframes ctx-slide-left-out  { from { opacity:1; transform:none } to { opacity:0; transform:translateX(-20px) } }
+@keyframes ctx-slide-right-out { from { opacity:1; transform:none } to { opacity:0; transform:translateX( 20px) } }
+@keyframes ctx-fade-out        { from { opacity:1 }                 to { opacity:0 } }
+@keyframes ctx-scale-out       { from { opacity:1; transform:none } to { opacity:0; transform:translateY(-6px) scale(.96) } }
+
+.ctx-wrap.is-closing                 { animation: ctx-slide-left-out  var(--ui-ctx-anim-close,180ms) cubic-bezier(0.2,0,0,1) forwards !important }
+.ctx-wrap.is-closing.anim-slideRight { animation: ctx-slide-right-out var(--ui-ctx-anim-close,180ms) cubic-bezier(0.2,0,0,1) forwards !important }
+.ctx-wrap.is-closing.anim-fade       { animation: ctx-fade-out        var(--ui-ctx-anim-close,160ms) ease forwards !important }
+.ctx-wrap.is-closing.anim-scale      { animation: ctx-scale-out       var(--ui-ctx-anim-close,160ms) cubic-bezier(0.2,0,0,1) forwards !important }
+.ctx-wrap.is-closing.anim-none       { animation:none; opacity:0 !important }
+
+/* ── Positioned wrapper ─────────────────────────────────────────────── */
+.ctx-wrap {
+    position: fixed;
+    z-index: 1000;
+    font-family: var(--ui-font-body);
+}
+.ctx-wrap.is-dragging  { user-select: none; }
+/* Hidden beneath a sub-menu: keep alive (preserves GIF state) but out of sight */
+.ctx-wrap.ctx-inactive { visibility: hidden; pointer-events: none; }
+
+/* ── Preview panel ──────────────────────────────────────────────────── */
+.ctx-preview {
+    position: absolute;
+    top: 0;
+    left: calc(var(--ui-ctx-width, 320px) + 8px);
+    width: var(--ui-ctx-preview-width, 240px);
+    background: var(--ui-ctx-bg-preview);
+    border: 1px solid var(--ui-ctx-border);
+    border-radius: var(--ui-ctx-radius);
+    box-shadow: var(--ui-ctx-shadow-preview);
+    overflow: hidden;
+}
+/* When the menu is on the right half of the screen, flip the preview to the left */
+.ctx-preview.is-left {
+    left: unset;
+    right: calc(var(--ui-ctx-width, 320px) + 8px);
+}
+.preview-img   { width:100%; height:120px; object-fit:cover; display:block }
+.preview-title { padding:10px 12px 4px; font-family:var(--ui-font-heading); font-size:var(--ui-font-size-md, 14px); font-weight:700; color:var(--ui-ctx-text-title) }
+.preview-desc  { padding:0 12px 10px; font-size:var(--ui-font-size-sm, 11px); color:var(--ui-ctx-text-dim); line-height:1.5 }
+.preview-stats { padding:8px 12px; border-top:1px solid var(--ui-ctx-border); display:flex; flex-direction:column; gap:7px }
+.ps-row   { display:flex; justify-content:space-between; margin-bottom:3px }
+.ps-label { font-size:var(--ui-font-size-xs, 10px); color:var(--ui-ctx-text-dim) }
+.ps-val   { font-size:var(--ui-font-size-xs, 10px); font-weight:600 }
+.ps-bar-bg   { height:3px; background:var(--ui-ctx-border, rgba(255,255,255,0.07)); border-radius:2px; overflow:hidden }
+.ps-bar-fill { height:100%; border-radius:inherit }
+
+/* ── Menu ───────────────────────────────────────────────────────────── */
+.ctx-menu {
+    width: var(--ui-ctx-width, 320px);
+    background: var(--ui-ctx-bg);
+    border-radius: var(--ui-ctx-radius);
+    border: 1px solid var(--ui-ctx-border);
+    box-shadow: var(--ui-ctx-shadow);
+    overflow: hidden;
+}
+
+/* ── Banner ─────────────────────────────────────────────────────────── */
+.ctx-banner {
+    height: var(--ui-ctx-banner-height, 100px);
+    background-size:cover; background-position:center;
+    position:relative; display:flex; align-items:flex-end;
+    cursor: grab;
+}
+.ctx-banner:active { cursor: grabbing }
+.drag-hint {
+    position:absolute; top:6px; right:8px;
+    color:rgba(255,255,255,0.4); opacity:0;
+    transition:opacity var(--ui-ctx-anim-item,150ms);
+}
+.ctx-banner:hover .drag-hint { opacity:1 }
+.ctx-banner-title {
+    width:100%; padding:8px 14px 10px;
+    background:linear-gradient(to top, var(--ui-ctx-bg) 0%, transparent 100%);
+    color:var(--ui-ctx-text-title);
+    font-family:var(--ui-font-heading); font-size:var(--ui-ctx-banner-font-size, 17px); font-weight:700;
+    letter-spacing:0.05em; text-transform:uppercase;
+}
+
+/* ── Title + drag handle ────────────────────────────────────────────── */
+.ctx-title {
+    display: flex; align-items: center;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid var(--ui-ctx-border);
+    background: var(--ui-ctx-bg-title);
+    color: var(--ui-ctx-text-title);
+    font-family: var(--ui-font-heading);
+    font-size: var(--ui-font-size-lg, 16px); font-weight:700;
+    letter-spacing:0.05em; text-transform:uppercase;
+    cursor: grab; user-select:none;
+}
+.ctx-title:active { cursor: grabbing }
+.title-text { flex:1 }
+.drag-icon  { color:var(--ui-ctx-icon-color); display:flex; align-items:center; opacity:0.5 }
+
+/* ── Description subtitle ───────────────────────────────────────────── */
+.ctx-desc {
+    padding:7px 14px; color:var(--ui-ctx-text-dim);
+    font-size:var(--ui-font-size-sm); line-height:1.5;
+    border-bottom:1px solid var(--ui-ctx-border);
+}

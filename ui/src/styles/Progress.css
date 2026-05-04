@@ -1,0 +1,73 @@
+/* Progress.svelte — progress bar styles. */
+
+.progress-wrap {
+    position: fixed;
+    /* Valeurs positionnées via CSS vars injectées par applySettings() dans App.svelte */
+    bottom:    var(--ui-progress-bottom,    60px);
+    top:       var(--ui-progress-top,       auto);
+    left:      var(--ui-progress-left,      50%);
+    right:     var(--ui-progress-right,     auto);
+    transform: var(--ui-progress-transform, translateX(-50%));
+    width: var(--ui-progress-width, 420px);
+    z-index: 1000;
+    animation: slideUp var(--ui-ctx-anim-open, 220ms) ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.progress-bar-container {
+    background: var(--ui-ctx-bg, rgba(12, 12, 22, 0.97));
+    border: 1px solid var(--ui-ctx-border, rgba(255,255,255,0.07));
+    border-bottom: 2px solid var(--ui-progress-fill, var(--ui-accent, #e94560));
+    border-radius: var(--ui-ctx-radius, 8px);
+    padding: 14px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: var(--ui-progress-shadow, 0 8px 32px rgba(0,0,0,0.5));
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.progress-label-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ui-ctx-text, rgba(255,255,255,0.82));
+    font-size: var(--ui-font-size-base, 13px);
+    font-weight: 500;
+}
+
+.progress-pct {
+    color: var(--ui-accent, #e94560) !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+}
+
+.progress-track {
+    height: var(--ui-progress-height, 6px);
+    background: var(--ui-progress-bg, rgba(255,255,255,0.1));
+    border-radius: var(--ui-progress-radius, 9999px);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--ui-progress-fill, var(--ui-accent, #e94560));
+    border-radius: var(--ui-progress-radius, 9999px);
+    transition: width 40ms linear;
+    box-shadow: var(--ui-progress-glow, 0 0 8px color-mix(in srgb, var(--ui-accent, #e94560) 50%, transparent));
+}
+
+.progress-hint {
+    color: var(--ui-ctx-text-muted, rgba(255,255,255,0.28));
+    font-size: var(--ui-font-size-sm, 11px);
+    text-align: center;
+}

@@ -1,0 +1,116 @@
+/* Alert.svelte — modal dialog styles.
+   backdrop-filter removed — causes full NUI black in FiveM CEF */
+
+.alert-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--ui-backdrop-bg, rgba(0, 0, 0, 0.55));
+    z-index: 1100;
+}
+
+.alert-wrap {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: var(--ui-modal-align, center);
+    justify-content: center;
+    padding: 40px 0;
+    z-index: 1101;
+    pointer-events: none;
+}
+
+.alert-modal {
+    width: var(--ui-alert-width, 340px);
+    background: var(--ui-ctx-bg, rgba(12,12,22,0.97));
+    border: 1px solid var(--ui-ctx-border, rgba(255,255,255,0.07));
+    border-top: 2px solid var(--alert-accent);
+    border-radius: var(--ui-ctx-radius, 8px);
+    box-shadow: var(--ui-ctx-shadow, 0 20px 60px rgba(0,0,0,0.7));
+    font-family: var(--ui-font-body);
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+/* ── Icon zone ─────────────────────────────────────────────────────── */
+.alert-icon-zone {
+    display: flex;
+    justify-content: center;
+    padding: 24px 20px 12px;
+    background: var(--alert-accent-bg);
+}
+
+.alert-icon-ring {
+    width: var(--ui-alert-icon-ring-size, 52px);
+    height: var(--ui-alert-icon-ring-size, 52px);
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--alert-accent) 30%, transparent);
+    background: color-mix(in srgb, var(--alert-accent) 12%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--alert-accent);
+}
+
+/* ── Content ───────────────────────────────────────────────────────── */
+.alert-body {
+    padding: 16px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+}
+
+.alert-title {
+    color: var(--ui-ctx-text-title, #fff);
+    font-family: var(--ui-font-heading, var(--ui-font-body));
+    font-size: var(--ui-font-size-lg, 16px);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.alert-message {
+    color: var(--ui-ctx-text-dim, rgba(255,255,255,0.45));
+    font-size: var(--ui-font-size-base, 13px);
+    line-height: 1.6;
+}
+
+/* ── Divider ───────────────────────────────────────────────────────── */
+.alert-divider {
+    height: 1px;
+    background: var(--ui-ctx-border-sep, rgba(255,255,255,0.06));
+    margin: 0 20px;
+}
+
+/* ── Actions ───────────────────────────────────────────────────────── */
+.alert-actions {
+    display: flex;
+    gap: 8px;
+    padding: 14px 20px;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 7px 18px;
+    border-radius: var(--ui-ctx-radius-item, 5px);
+    font-family: var(--ui-font-body);
+    font-size: var(--ui-font-size-sm, 11px);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    transition: filter var(--ui-ctx-anim-item,120ms) ease, background var(--ui-ctx-anim-item,120ms) ease;
+}
+
+.btn-confirm {
+    background: var(--alert-accent);
+    color: var(--ui-accent-text, #fff);
+}
+.btn-confirm:hover { filter: brightness(1.15); }
+
+.btn-cancel {
+    background: var(--ui-ctx-bg-hover, rgba(255,255,255,0.08));
+    color: var(--ui-ctx-text-dim, rgba(255,255,255,0.45));
+    border: 1px solid var(--ui-ctx-border-item, rgba(255,255,255,0.10));
+}
+.btn-cancel:hover { background: var(--ui-ctx-bg-active, rgba(255,255,255,0.13)); }

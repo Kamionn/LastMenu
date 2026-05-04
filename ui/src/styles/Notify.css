@@ -1,0 +1,140 @@
+/* Notify.svelte — toast notification styles. */
+
+.notify-container {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-notify-gap, 8px);
+    width: var(--ui-notify-width, 320px);
+    z-index: 9998;
+    pointer-events: none;
+}
+
+.pos-right  { right: var(--ui-notify-offset, 20px); left: unset; }
+.pos-left   { left: var(--ui-notify-offset, 20px);  right: unset; }
+.pos-bottom { bottom: var(--ui-notify-offset, 20px); top: unset; }
+.pos-top    { top: var(--ui-notify-offset, 20px);    bottom: unset; }
+.dir-bottom { flex-direction: column-reverse; }
+.dir-top    { flex-direction: column; }
+
+/* ── Toast ──────────────────────────────────────────────────────────── */
+.toast {
+    position: relative;
+    background: var(--ui-ctx-bg, rgba(95, 15, 133, 0.97));
+    /* backdrop-filter: blur(var(--ui-blur, 0px)); */
+    border: 1px solid var(--ui-ctx-border, rgba(166, 255, 0, 0.07));
+    border-left: 3px solid var(--c);
+    border-radius: var(--ui-ctx-radius, 8px);
+    font-family: var(--ui-font-body);
+    overflow: hidden;
+    pointer-events: auto;
+    animation: toastIn var(--ui-ctx-anim-open, 220ms) cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px) scale(0.95);
+        filter: blur(var(--ui-blur, 0px));
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+/* On adapte selon le côté */
+.enter-right { transform-origin: right center; }
+.enter-left  { transform-origin: left center; animation-name: toastInLeft; }
+
+@keyframes toastInLeft {
+    from { opacity: 0; transform: translateX(-30px) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* ── Timer bar ──────────────────────────────────────────────────────── */
+.timer-bar {
+    height: var(--ui-notify-timer-height, 3px);
+    /* background: var(--ui-notify-timer-bg, rgba(255,255,255,0.05)); */
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+}
+
+.timer-fill {
+    height: 100%;
+    background: var(--c);
+    transition: width 100ms linear;
+    box-shadow: 0 0 10px var(--c);
+}
+
+/* ── Corps ──────────────────────────────────────────────────────────── */
+.toast-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: var(--ui-notify-padding, 12px);
+}
+
+/* ── Badge icône ────────────────────────────────────────────────────── */
+.toast-badge {
+    flex-shrink: 0;
+    width: var(--ui-notify-badge-size, 32px);
+    height: var(--ui-notify-badge-size, 32px);
+    border-radius: var(--ui-ctx-radius-item, 5px);
+    background: color-mix(in srgb, var(--c) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c) 25%, transparent);
+    color: var(--c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Texte ──────────────────────────────────────────────────────────── */
+.toast-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 2px;
+}
+
+.toast-title {
+    font-size: var(--ui-font-size-base, 13px);
+    font-family: var(--ui-font-heading, var(--ui-font-body));
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ui-ctx-text-title, #fff);
+}
+
+.toast-message {
+    font-weight: 500;
+    color: var(--ui-ctx-text, rgba(255,255,255,0.82));
+}
+
+/* ── Dismiss ────────────────────────────────────────────────────────── */
+.toast-dismiss {
+    flex-shrink: 0;
+    width: var(--ui-notify-dismiss-size, 18px);
+    height: var(--ui-notify-dismiss-size, 18px);
+    border-radius: var(--ui-ctx-radius-xs, 3px);
+    background: var(--ui-ctx-bg-hover, rgba(255,255,255,0.06));
+    color: var(--ui-ctx-text-muted, rgba(255,255,255,0.35));
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    transition: background var(--ui-ctx-anim-item,80ms), color var(--ui-ctx-anim-item,80ms);
+    padding: 0;
+    margin-top: 2px;
+}
+.toast-dismiss:hover { background: var(--ui-ctx-bg-active, rgba(255,255,255,0.12)); color: var(--ui-ctx-text-title, #fff); }

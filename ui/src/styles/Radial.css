@@ -1,0 +1,222 @@
+/* Radial.svelte — radial menu styles. */
+
+/* ── Overlay ──────────────────────────────────────────────────────── */
+.radial-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    cursor: default;
+}
+
+/* Backdrop semi-transparent.
+   backdrop-filter is intentionally NOT used: in FiveM's CEF renderer,
+   applying blur on a full-viewport element with a transparent NUI root
+   causes the entire page to composite on black, making the game world
+   invisible. A plain rgba overlay is the correct pattern for FiveM NUI. */
+.radial-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--ui-radial-backdrop-bg, rgba(0, 0, 0, 0.48));
+}
+
+/* ── Container ────────────────────────────────────────────────────── */
+.radial-container {
+    position: relative;
+    width: var(--ui-radial-container-size, 340px);
+    height: var(--ui-radial-container-size, 340px);
+    z-index: 1;
+    scale: var(--ui-radial-scale, 1);
+    transform-origin: center center;
+    animation: radialIn var(--ui-ctx-anim-open,320ms) cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+@keyframes radialIn {
+    from { opacity: 0; scale: 0.6; }
+    to   { opacity: 1; scale: var(--ui-radial-scale, 1); }
+}
+
+@keyframes radialOut {
+    from { opacity: 1; scale: var(--ui-radial-scale, 1); }
+    to   { opacity: 0; scale: 0.7; }
+}
+
+.is-closing .radial-container {
+    animation: radialOut var(--ui-ctx-anim-close,180ms) ease-in both;
+}
+
+/* ── SVG ──────────────────────────────────────────────────────────── */
+.radial-svg {
+    position: absolute;
+    top: 0; left: 0;
+}
+
+/* Arcs de fond */
+.arc {
+    fill: var(--ui-radial-arc-bg, rgba(15, 15, 30, 0.78));
+    stroke: var(--ui-radial-arc-stroke, rgba(255, 255, 255, 0.12));
+    stroke-width: 1;
+    transition: fill var(--ui-ctx-anim-item,120ms) ease, stroke var(--ui-ctx-anim-item,120ms) ease;
+    cursor: pointer;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+}
+.arc-active {
+    fill: color-mix(in srgb, var(--ui-accent, #e94560) 22%, rgba(8,8,20,0.9));
+    stroke: var(--ui-accent, #e94560);
+    stroke-width: 1.5;
+}
+.arc-disabled {
+    fill: var(--ui-radial-arc-disabled-bg, rgba(8, 8, 20, 0.35));
+    stroke: var(--ui-radial-arc-disabled-stroke, rgba(255,255,255,0.03));
+    cursor: default;
+    opacity: 0.4;
+}
+
+/* Glow de l'arc actif */
+.arc-glow {
+    fill: color-mix(in srgb, var(--ui-accent, #e94560) 30%, transparent);
+    stroke: none;
+    filter: blur(12px);
+    opacity: 0.7;
+}
+
+/* Rings intérieurs */
+.inner-ring {
+    fill: var(--ui-radial-ring-bg, rgba(255,255,255,0.02));
+    stroke: var(--ui-radial-ring-stroke, rgba(255,255,255,0.12));
+    stroke-width: 1.5;
+    pointer-events: none;
+}
+.inner-ring-inner {
+    fill: var(--ui-radial-ring-inner-bg, rgba(10,10,24,0.72));
+    stroke: var(--ui-radial-ring-inner-stroke, rgba(255,255,255,0.07));
+    stroke-width: 1;
+    pointer-events: none;
+}
+
+/* Labels extérieurs SVG */
+.sector-label-svg {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    fill: var(--ui-ctx-text-dim, rgba(255,255,255,0.45));
+    font-family: var(--ui-font-body, sans-serif);
+    transition: fill var(--ui-ctx-anim-item,120ms) ease;
+    pointer-events: none;
+    paint-order: stroke fill;
+    stroke: var(--ui-radial-label-stroke, rgba(0,0,0,0.8));
+    stroke-width: 3px;
+    stroke-linejoin: round;
+}
+.label-active {
+    fill: var(--ui-ctx-text-title, #fff);
+    font-weight: 700;
+}
+
+/* ── Centre ───────────────────────────────────────────────────────── */
+.center-area {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--ui-radial-center-size, 84px);
+    height: var(--ui-radial-center-size, 84px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.center-text {
+    color: var(--ui-ctx-text-title, #fff);
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+    max-width: 76px;
+    line-height: 1.35;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.center-text-idle {
+    color: var(--ui-ctx-text-dim, rgba(255,255,255,0.45));
+    font-weight: 600;
+}
+
+.center-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--ui-radial-dot-bg, rgba(255,255,255,0.15));
+    border: 1.5px solid var(--ui-radial-dot-border, rgba(255,255,255,0.3));
+    animation: pulse 2s ease-in-out infinite;
+    animation-play-state: var(--ui-anim-play, running);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.4); }
+}
+
+/* ── Icônes HTML ──────────────────────────────────────────────────── */
+.sector-icon {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    color: var(--ui-radial-icon-color, rgba(255,255,255,0.55));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: color var(--ui-ctx-anim-item,120ms) ease, transform var(--ui-ctx-anim-item,120ms) cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 2;
+    width: 28px; height: 28px;
+    border-radius: 7px;
+}
+
+.icon-active {
+    color: var(--ui-ctx-text-title, #fff);
+    transform: translate(-50%, -50%) scale(1.25);
+    filter: drop-shadow(0 0 6px var(--ui-accent, #e94560));
+}
+
+.icon-disabled {
+    color: var(--ui-ctx-text-disabled, rgba(255,255,255,0.22));
+}
+
+.icon-fallback {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Hold-to-confirm: progress ring around the inner circle */
+.hold-ring {
+    fill: none;
+    stroke: var(--ui-accent, #e94560);
+    stroke-width: 3px;
+    stroke-linecap: round;
+    pointer-events: none;
+    filter: drop-shadow(0 0 5px var(--ui-accent, #e94560));
+    transition: stroke-dasharray 16ms linear;
+}
+
+
+/* ── Submenu badge ────────────────────────────────────────────────── */
+.submenu-badge {
+    position: absolute;
+    bottom: -3px;
+    right: -4px;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--ui-accent, #e94560);
+    text-shadow: 0 0 4px rgba(0,0,0,0.9);
+    pointer-events: none;
+}

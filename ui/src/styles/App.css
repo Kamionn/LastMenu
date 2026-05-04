@@ -1,0 +1,14 @@
+/* App.svelte — root layout styles. */
+
+.settings-hint {
+    position: fixed;
+    bottom: 12px;
+    left: 14px;
+    font-size: 10px;
+    font-family: var(--ui-font-body, sans-serif);
+    color: rgba(255, 255, 255, 0.20);
+    letter-spacing: 0.08em;
+    pointer-events: none;
+    user-select: none;
+    z-index: 50;
+}

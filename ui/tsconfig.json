@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "compilerOptions": {
+        "moduleResolution": "bundler",
+        "target":           "ESNext",
+        "module":           "ESNext",
+        "strict":           true,
+        "checkJs":          false,
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax":       true,
+        "noEmit":           true,
+        "types":            ["svelte", "vite/client"]
+    },
+    "include": ["src/**/*.ts", "src/**/*.svelte"],
+    "exclude": ["node_modules"]
+}

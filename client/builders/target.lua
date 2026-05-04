@@ -1,0 +1,3 @@
+-- target.lua — split into target/zones.lua, target/raycast.lua, target/ui.lua
+-- This file is intentionally empty; the three modules above are loaded explicitly
+-- in fxmanifest.lua before this glob entry.

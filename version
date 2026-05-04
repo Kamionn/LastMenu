@@ -1,0 +1,12 @@
+version = 1.0.0
+author  = Kamionn
+docs    = https://kamionn.github.io/LastMenu-docs/
+updates = https://kamionn.github.io/LastMenu-docs/patchnote
+
+ascii = [
+ _               _   __  __
+| |    __ _ ___ | |_|  \/  | ___ _ __  _   _
+| |   / _` / __|| __| |\/| |/ _ \ '_ \| | | |
+| |__| (_| \__ \| |_| |  | |  __/ | | | |_| |
+|_____\__,_|___/ \__|_|  |_|\___|_| |_|\__,_|
+]

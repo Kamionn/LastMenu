@@ -1,0 +1,16 @@
+/* ContextSearch.svelte — search bar styles. */
+
+.ctx-search {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--ui-ctx-border);
+    background: var(--ui-ctx-bg-search);
+    color: var(--ui-ctx-text-muted);
+}
+.ctx-search input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--ui-ctx-text);
+    font-size: var(--ui-font-size-base);
+    font-family: var(--ui-font-body);
+}
+.ctx-search input::placeholder { color: var(--ui-ctx-text-muted) }
