@@ -10,11 +10,11 @@ Version scheme: `MAJOR.MINOR.PATCH` — breaking changes bump MAJOR.
 
 ### Added
 
-- **`UI_ConfirmAsync(message, opts?)`** (`alert.lua`, `exports.lua`) — one-liner async confirm shortcut. Wraps `UI_AlertAsync` avec confirm/cancel pré-remplis. Accepte `{ type, title, confirm_label, cancel_label }`. Exporté via `exports('confirm_async', ...)`.
-- **`/lm_overlay` command + `debug_overlay` export** (`exports.lua`) — overlay watcher stats en temps réel via `DrawText`. Affiche field, status (ok/DIS), interval et cb_id suffix pour tous les watchers actifs. ACE permission: `lastmenu.dev`.
-- **Notification group counter** (`Notify.svelte`, `Notify.css`) — quand un toast avec `group` arrive alors qu'un identique est déjà affiché, le compteur `×N` s'incrémente au lieu de remplacer silencieusement.
-- **NUI crash safety net** (`App.svelte`) — `window.onerror` + `window.onunhandledrejection` dans `onMount`. Si une erreur JS survient avec le stack non vide, fire `/escape` pour libérer le NUI focus.
-- **`useTarget.svelte.ts`** (`TargetComponents/`) — fichier manquant créé. Implémente cooldown réactif (timer 100ms), stateful items (toggle/checkbox/slider), accordions, hold-to-confirm pour les menus target.
+- **`UI_ConfirmAsync(message, opts?)`** (`alert.lua`, `exports.lua`) — one-liner async confirm shortcut. Wraps `UI_AlertAsync` with pre-filled confirm/cancel buttons. Accepts `{ type, title, confirm_label, cancel_label }`. Exported via `exports('confirm_async', ...)`.
+- **`/lm_overlay` command + `debug_overlay` export** (`exports.lua`) — real-time watcher stats overlay via `DrawText`. Displays field, status (ok/DIS), interval and cb_id suffix for all active watchers. ACE permission: `lastmenu.dev`.
+- **Notification group counter** (`Notify.svelte`, `Notify.css`) — when a toast with `group` arrives while an identical one is already shown, the `×N` counter increments instead of silently replacing it.
+- **NUI crash safety net** (`App.svelte`) — `window.onerror` + `window.onunhandledrejection` in `onMount`. If a JS error occurs while the stack is non-empty, fires `/escape` to release NUI focus.
+- **`useTarget.svelte.ts`** (`TargetComponents/`) — missing file created. Implements reactive cooldown (100ms timer), stateful items (toggle/checkbox/slider), accordions, hold-to-confirm for target menus.
 - **Reset all settings** — footer button (red-tinted) resets every field to `SETTINGS_DEFAULTS` in the live local state; live preview reflects it instantly; Cancel still discards without saving.
 - **Live preview** — settings panel now applies theme changes in real-time while open; cancelling or closing reverts to the saved state without touching `localStorage`. Implemented via a split `$effect` pair in `App.svelte` and an `onPreview` callback chain through `UserSettings` → `useUserSettings`.
 - ~~**Hold duration** (Navigation section)~~ — removed from user settings panel; `_normalizeHold` still resolves `user > dev > config` but the user override is no longer exposed in the UI.
@@ -25,9 +25,9 @@ Version scheme: `MAJOR.MINOR.PATCH` — breaking changes bump MAJOR.
 
 ### Fixed
 
-- **`selectedIndex` hors bornes sur radial** (`useRadial.svelte.ts`) — `kbIndex >= 0` ne vérifiait pas `kbIndex < n`. Si un bouton devenait invisible pendant la nav clavier, retournait un index invalide. Ajout du guard `kbIndex < n`.
-- **`rgb()` accent sans `--ui-accent-dim`** (`theme.ts`) — le calcul de la teinte sombre ne traitait que `#rrggbb`/`#rgb`. Les couleurs `rgb(r,g,b)` ne généraient pas de dim shade. Ajout du parsing `rgb()`/`rgba()`.
-- **Dead code supprimé** (`stack.lua`) — bloc `DisableControlAction(199/200)` + caméra AFK commenté sans documentation retiré.
+- **`selectedIndex` out of bounds on radial** (`useRadial.svelte.ts`) — `kbIndex >= 0` did not check `kbIndex < n`. If a button became invisible during keyboard navigation, an invalid index was returned. Added guard `kbIndex < n`.
+- **`rgb()` accent missing `--ui-accent-dim`** (`theme.ts`) — dark shade calculation only handled `#rrggbb`/`#rgb`. `rgb(r,g,b)` colors did not generate a dim shade. Added `rgb()`/`rgba()` parsing.
+- **Dead code removed** (`stack.lua`) — commented-out `DisableControlAction(199/200)` block and undocumented AFK camera code removed.
 - **Radial menu coordinates broken at >1080p** — `handleMousemove` computed mouse position relative to `getBoundingClientRect()` without accounting for the CSS `zoom` applied by `applyViewportScale`. At resolutions > 1920×1080 (e.g. 1440p, 4K) the zoom factor caused the mouse-to-arc mapping to be off proportionally to the scale, requiring the mouse to be far outside the visual menu to register a sector. Fix: divide `(clientX - rect.left)` and `(clientY - rect.top)` by `parseFloat(document.documentElement.style.zoom) || 1`.
 - **Target hold key not detected on resource restart** — `RegisterKeyMapping` binding propagation in FiveM is asynchronous; after a resource restart the `+lastmenu_target` command may not fire until the GTA key-binding system refreshes (triggered by another resource starting). Added `IsControlPressed(0, Config.target_hold_key)` as a direct fallback alongside `LastMenu._targetHeld` in the polling condition. The fallback activates the reticle on the default key immediately after restart; once the key mapping propagates, the command path takes over. Players who rebind the key in GTA settings are unaffected (the command fires on their custom key; the fallback only covers the default).
 - **Reset All button overflows footer at narrow widths / long translations** — changed from `[icon + text]` to icon-only (`RotateCcw`) with `title` tooltip, reducing the footer IO row to three compact icon buttons that never push Cancel / Save off-screen.
@@ -51,13 +51,13 @@ Version scheme: `MAJOR.MINOR.PATCH` — breaking changes bump MAJOR.
 ### Changed
 
 - **Settings panel sections restructured**
-  - Sections `modal` + `progress` merged into **Composants / Components** (id `components`).
+  - Sections `modal` + `progress` merged into **Components** (id `components`).
   - `perfMode` toggle moved into the **Appearance** section (after blur effects).
   - `perf` section removed.
   - `target_key` block and `nav_hint` developer note removed from Navigation section.
-  - **Components tab expanded** — `context` and `notify` sections removed as standalone sidebar entries; their settings merged into **Components** under labelled sub-group separators (`──── CONTEXTE ────`, `──── NOTIFICATIONS ────`, etc.). Radial and Target size settings also moved from Appearance into Components. Sidebar reduced from 7 to 5 tabs.
+  - **Components tab expanded** — `context` and `notify` sections removed as standalone sidebar entries; their settings merged into **Components** under labelled sub-group separators (`──── CONTEXT ────`, `──── NOTIFICATIONS ────`, etc.). Radial and Target size settings also moved from Appearance into Components. Sidebar reduced from 7 to 5 tabs.
   - **Settings panel opens on Appearance** by default (was Navigation).
-  - **Hint copy cleaned** — developer-facing notes removed from `hold_duration_hint`, `page_size_hint`, and `lang_hint` across all 8 languages; these hints now convey only what is actionable for the player.
+  - **Hint copy cleaned** — developer-facing notes removed from `hold_duration_hint`, `page_size_hint`, and `lang_hint` across all 8 languages; hints now convey only what is actionable for the player.
 - **`SETTINGS_VERSION` bumped 3 → 4** — new fields (`holdDuration`, `pageSize`, `radialSize`, `targetSize`) added to `UserSettings` interface and `SETTINGS_DEFAULTS` (all default `null`).
 - **`targetKey` removed** from `UserSettings` interface and defaults (superseded by `RegisterKeyMapping`).
 - **Translations** — `sec_modal`, `sec_progress`, `sec_perf` removed from `TranslationKeys`; `sec_components` added. New keys: `hold_duration`, `hold_duration_hint`, `page_size`, `page_size_hint`, `radial_size`, `radial_size_hint`, `target_size`, `target_size_hint`, `auto_label`, `size_compact`, `size_normal`, `size_large`, `comp_context`, `comp_notify`, `comp_radial`, `comp_target`, `comp_modal`, `comp_progress` — all 8 languages.
