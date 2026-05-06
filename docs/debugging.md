@@ -35,7 +35,7 @@ Runs the regression test suite. Only works if `test/regression.lua` is loaded in
 
 ### `/lm_debug`
 
-Prints a snapshot of all active watcher state to the **server console**:
+Prints a snapshot of all active watcher state to the **client console** (F8 in-game):
 
 ```
 [LastMenu] ── Watcher stats ──────────────────────────
@@ -63,10 +63,10 @@ exports.LastMenu:debug_stats()
 
 ## Reading watcher errors
 
-When a watcher function throws an error 3 times in a row, you'll see:
+When a watcher function throws an error 5 times in a row, you'll see:
 
 ```
-[LastMenu] Watcher DISABLED [1735000000_1:disabled] — will retry in 15s. Error: attempt to index a nil value (global 'playerData')
+[LastMenu] Watcher DISABLED [1735000000_1:disabled] — will retry in 30s. Error: attempt to index a nil value (global 'playerData')
 ```
 
 The error message is the Lua error thrown by the watcher function. Common causes:
@@ -127,7 +127,7 @@ The stack type values are: `'context'`, `'alert'`, `'input'`, `'progress'`,
 ### Watchers stop updating after a few seconds
 
 - Safe Mode triggered. Run `/lm_debug` to see which watcher is disabled and what
-  error it threw. Fix the watcher function and the menu will auto-recover within 15s.
+  error it threw. Fix the watcher function and the menu will auto-recover within 30s.
 
 ### `UI_AlertAsync` returns `false` immediately
 

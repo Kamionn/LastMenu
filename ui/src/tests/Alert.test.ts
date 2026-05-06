@@ -4,113 +4,113 @@ import Alert from '../components/Alert.svelte'
 
 const baseData = {
     type:    'confirm' as const,
-    title:   'Confirm',
-    message: 'Are you sure?',
-    confirm: { id: 'cb_confirm', label: 'Yes' },
-    cancel:  { id: 'cb_cancel',  label: 'No' },
+    title:   'Confirmer',
+    message: 'Êtes-vous sûr ?',
+    confirm: { id: 'cb_confirm', label: 'Oui' },
+    cancel:  { id: 'cb_cancel',  label: 'Non' },
 }
 
-describe('Alert — rendering', () => {
-    it('renders title and message', () => {
+describe('Alert — rendu', () => {
+    it('affiche le titre et le message', () => {
         const { getByText } = render(Alert, { data: baseData, onCallback: vi.fn() })
-        expect(getByText('Confirm')).toBeInTheDocument()
-        expect(getByText('Are you sure?')).toBeInTheDocument()
+        expect(getByText('Confirmer')).toBeInTheDocument()
+        expect(getByText('Êtes-vous sûr ?')).toBeInTheDocument()
     })
 
-    it('renders confirm and cancel buttons', () => {
+    it('affiche les boutons confirm et cancel', () => {
         const { getByText } = render(Alert, { data: baseData, onCallback: vi.fn() })
-        expect(getByText('Yes')).toBeInTheDocument()
-        expect(getByText('No')).toBeInTheDocument()
+        expect(getByText('Oui')).toBeInTheDocument()
+        expect(getByText('Non')).toBeInTheDocument()
     })
 
-    it('does not render title when data.title is absent', () => {
+    it("n'affiche pas de titre quand data.title est absent", () => {
         const { queryByText } = render(Alert, {
             data: { ...baseData, title: undefined },
             onCallback: vi.fn(),
         })
-        expect(queryByText('Confirm')).not.toBeInTheDocument()
+        expect(queryByText('Confirmer')).not.toBeInTheDocument()
     })
 
-    it('does not render message when data.message is absent', () => {
+    it("n'affiche pas de message quand data.message est absent", () => {
         const { queryByText } = render(Alert, {
             data: { ...baseData, message: undefined },
             onCallback: vi.fn(),
         })
-        expect(queryByText('Are you sure?')).not.toBeInTheDocument()
+        expect(queryByText('Êtes-vous sûr ?')).not.toBeInTheDocument()
     })
 
-    it('does not render cancel button when data.cancel is absent', () => {
+    it("n'affiche pas de bouton cancel quand data.cancel est absent", () => {
         const { queryByText } = render(Alert, {
             data: { ...baseData, cancel: undefined },
             onCallback: vi.fn(),
         })
-        expect(queryByText('No')).not.toBeInTheDocument()
+        expect(queryByText('Non')).not.toBeInTheDocument()
     })
 
-    it('does not render confirm button when data.confirm is absent', () => {
+    it("n'affiche pas de bouton confirm quand data.confirm est absent", () => {
         const { queryByText } = render(Alert, {
             data: { ...baseData, confirm: undefined },
             onCallback: vi.fn(),
         })
-        expect(queryByText('Yes')).not.toBeInTheDocument()
+        expect(queryByText('Oui')).not.toBeInTheDocument()
     })
 })
 
-describe('Alert — mouse interactions', () => {
-    it('click on Confirm calls onCallback with confirm.id', async () => {
+describe('Alert — interactions souris', () => {
+    it("clic sur Confirmer appelle onCallback avec confirm.id", async () => {
         const onCallback = vi.fn()
         const { getByText } = render(Alert, { data: baseData, onCallback })
-        await fireEvent.click(getByText('Yes'))
+        await fireEvent.click(getByText('Oui'))
         expect(onCallback).toHaveBeenCalledOnce()
         expect(onCallback).toHaveBeenCalledWith('cb_confirm')
     })
 
-    it('click on Cancel calls onCallback with cancel.id', async () => {
+    it("clic sur Annuler appelle onCallback avec cancel.id", async () => {
         const onCallback = vi.fn()
         const { getByText } = render(Alert, { data: baseData, onCallback })
-        await fireEvent.click(getByText('No'))
+        await fireEvent.click(getByText('Non'))
         expect(onCallback).toHaveBeenCalledOnce()
         expect(onCallback).toHaveBeenCalledWith('cb_cancel')
     })
 })
 
-describe('Alert — keyboard navigation', () => {
-    it('Enter triggers confirm', async () => {
+describe('Alert — navigation clavier', () => {
+    it('Entrée déclenche le confirm', async () => {
         const onCallback = vi.fn()
         render(Alert, { data: baseData, onCallback })
         await fireEvent.keyDown(window, { key: 'Enter' })
         expect(onCallback).toHaveBeenCalledWith('cb_confirm')
     })
 
-    it('Space triggers confirm', async () => {
+    it('Espace déclenche le confirm', async () => {
         const onCallback = vi.fn()
         render(Alert, { data: baseData, onCallback })
         await fireEvent.keyDown(window, { key: ' ' })
         expect(onCallback).toHaveBeenCalledWith('cb_confirm')
     })
 
-    it('Escape triggers cancel', async () => {
+    it('Escape déclenche le cancel', async () => {
         const onCallback = vi.fn()
         render(Alert, { data: baseData, onCallback })
         await fireEvent.keyDown(window, { key: 'Escape' })
         expect(onCallback).toHaveBeenCalledWith('cb_cancel')
     })
 
-    it('Backspace triggers cancel', async () => {
+    it('Backspace déclenche le cancel', async () => {
         const onCallback = vi.fn()
         render(Alert, { data: baseData, onCallback })
         await fireEvent.keyDown(window, { key: 'Backspace' })
         expect(onCallback).toHaveBeenCalledWith('cb_cancel')
     })
 
-    it('Enter without confirm does not throw', async () => {
+    it("Entrée sans confirm ne plante pas", async () => {
         const onCallback = vi.fn()
         render(Alert, { data: { ...baseData, confirm: undefined }, onCallback })
         await expect(fireEvent.keyDown(window, { key: 'Enter' })).resolves.toBeDefined()
         expect(onCallback).not.toHaveBeenCalled()
     })
 
-    it('Escape without cancel does not throw', async () => {
+    it("Escape sans cancel ne plante pas", async () => {
         const onCallback = vi.fn()
         render(Alert, { data: { ...baseData, cancel: undefined }, onCallback })
         await expect(fireEvent.keyDown(window, { key: 'Escape' })).resolves.toBeDefined()
@@ -121,19 +121,19 @@ describe('Alert — keyboard navigation', () => {
 describe('Alert — types', () => {
     const types = ['warning', 'error', 'success', 'info', 'confirm'] as const
 
-    it.each(types)('mounts without error for type %s', (type) => {
+    it.each(types)('se monte sans erreur pour le type %s', (type) => {
         const data = { ...baseData, type }
         expect(() => render(Alert, { data, onCallback: vi.fn() })).not.toThrow()
     })
 
-    it("default type is 'confirm' when confirm is provided", () => {
+    it("type par défaut est 'confirm' quand confirm est fourni", () => {
         const data = { ...baseData, type: undefined }
         const { container } = render(Alert, { data, onCallback: vi.fn() })
-        // Component derives type internally — just verify it mounts
+        // Le composant dérive le type internalement — vérifie juste qu'il monte
         expect(container.querySelector('.alert-modal')).toBeInTheDocument()
     })
 
-    it("default type is 'info' when confirm is absent", () => {
+    it("type par défaut est 'info' quand confirm est absent", () => {
         const data = { message: 'Info', type: undefined, confirm: undefined, cancel: undefined }
         const { container } = render(Alert, { data, onCallback: vi.fn() })
         expect(container.querySelector('.alert-modal')).toBeInTheDocument()

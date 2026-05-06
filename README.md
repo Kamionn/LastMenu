@@ -6,7 +6,7 @@ One API. All menu types. Real-time reactivity.
 > **Zero runtime dependencies** — works without `ox_lib`, `qbx_core`, or any other framework.  
 > The Svelte 5 UI is pre-compiled in `ui/assets/` — no `npm install` required to run the server.
 
-**Current version: [1.0.1](CHANGELOG.md)**
+**Current version: [1.0.2](CHANGELOG.md)**
 
 ---
 

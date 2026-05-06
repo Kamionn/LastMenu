@@ -24,9 +24,16 @@ local DEBUG_PRINT_EVERY  = 60
 -- Error 1 → 1s, 2 → 2s, 3 → 4s, 4 → 8s, 5+ → disable.
 local ERROR_BACKOFF_STEPS = { 1000, 2000, 4000, 8000 }
 
+-- Upvalue cache: avoids _ENV table lookups on every hot-path call inside the tick loop.
+local json_encode = json.encode
+local math_floor  = math.floor
+local math_min    = math.min
+local math_max    = math.max
+local math_random = math.random
+
 -- Returns `ms` with ±10% uniform jitter so simultaneous watchers don't retry in lockstep.
 local function _jitter(ms)
-    return math.floor(ms * (0.9 + math.random() * 0.2))
+    return math_floor(ms * (0.9 + math_random() * 0.2))
 end
 
 ---@class LM.Reactive
@@ -54,10 +61,11 @@ function Reactive.attach(menu_id, watchers)
         w.disabled         = false
         w.retryAt          = nil
         w.zombieRetries    = 0
-        w._lastJson        = type(w.last) == 'table' and json.encode(w.last) or nil
+        w._lastJson        = type(w.last) == 'table' and json_encode(w.last) or nil
         w._menuId          = menu_id   -- stored so _processWatcher can log with context
         w._debouncePending = nil
         w._debounceEmitAt  = nil
+        w._hasDebounce     = type(w.debounce_ms) == 'number' and w.debounce_ms > 0
     end
 
     Reactive._watchers[menu_id] = watchers
@@ -151,18 +159,18 @@ function Reactive._processWatcher(w, now, batch)
     end
 
     w.errCount = 0
-    w.intervalCurrent = w.interval  -- reset to base interval on success
+    if w.intervalCurrent ~= w.interval then w.intervalCurrent = w.interval end
 
     -- ── Change detection ─────────────────────────────────────────────────────
     -- Tables: compare by JSON encoding (content equality), not reference.
     local changed
     if type(value) == 'table' then
-        local encOk, enc = pcall(json.encode, value)
+        local encOk, enc = pcall(json_encode, value)
         if not encOk then
             -- Malformed table (circular ref, unencodable userdata, etc.).
             -- Treat as a watcher error so the element gets backoff, not a thread crash.
             w.errCount = w.errCount + 1
-            local step = ERROR_BACKOFF_STEPS[math.min(w.errCount, #ERROR_BACKOFF_STEPS)]
+            local step = ERROR_BACKOFF_STEPS[math_min(w.errCount, #ERROR_BACKOFF_STEPS)]
             w.intervalCurrent = _jitter(step)
             w.nextAt = now + w.intervalCurrent
             if Config.debug then
@@ -182,7 +190,7 @@ function Reactive._processWatcher(w, now, batch)
         w.stableCount = 0
         w.intervalCurrent = w.interval  -- reset to base on change
 
-        if w.debounce_ms and w.debounce_ms > 0 then
+        if w._hasDebounce then
             w._debouncePending = value
             w._debounceEmitAt  = now + w.debounce_ms
         else
@@ -195,15 +203,15 @@ function Reactive._processWatcher(w, now, batch)
         w.stableCount = (w.stableCount or 0) + 1
         if w.stableCount >= STABLE_THRESHOLD then
             w.stableCount     = 0
-            w.intervalCurrent = math.min(
-                math.floor(w.intervalCurrent * BACKOFF_FACTOR),
+            w.intervalCurrent = math_min(
+                math_floor(w.intervalCurrent * BACKOFF_FACTOR),
                 w.interval * BACKOFF_MAX_MULT
             )
         end
     end
 
     -- Flush debounced value when the silence window has elapsed.
-    if w._debounceEmitAt and now >= w._debounceEmitAt then
+    if w._hasDebounce and w._debounceEmitAt and now >= w._debounceEmitAt then
         batch = batch or {}
         local change = { id = w.id }
         change[w.field] = w._debouncePending
@@ -230,7 +238,7 @@ function Reactive.startTicking(menu_id)
         for _, w in ipairs(watchers) do
             if w.interval < minInterval then minInterval = w.interval end
         end
-        local tickMs = math.max(50, math.min(math.floor(minInterval / 2), 500))
+        local tickMs = math_max(50, math_min(math_floor(minInterval / 2), 500))
 
         local dbgTick, dbgPatches
         if Config.debug then dbgTick, dbgPatches = 0, 0 end

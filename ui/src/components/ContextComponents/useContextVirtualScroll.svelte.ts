@@ -61,7 +61,7 @@ export function useContextVirtualScroll(config: VirtualScrollConfig) {
         config.getScrollMode() ? Math.max(0, totalHeight - (cumulHeights[virtualEnd] ?? totalHeight)) : 0
     )
 
-    // Reset scroll to top when search query changes
+    // Reset scroll to top when search query changes (nouveaux résultats = retour en haut)
     $effect(() => {
         void config.getSearchQuery()
         if (!config.getScrollMode()) return

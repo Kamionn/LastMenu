@@ -12,16 +12,20 @@
     import { loadSettings, applyTheme } from './utils/theme'
     import { applyViewportScale } from './utils/viewport'
 
-    let stack     = $state([])
-    let topMenu   = $derived(stack.length > 0 ? stack[stack.length - 1] : null)
-    let notifyRef = $state(null)
+    let stack          = $state([])
+    let topMenu        = $derived(stack.length > 0 ? stack[stack.length - 1] : null)
+    let notifyRef      = $state(null)
+    let previewSettings = $state(null)
 
     // ── User settings ──────────────────────────────────────────────────────
     let userSettings = $state(loadSettings())
 
     $effect(() => {
-        applyTheme(userSettings)
+        applyTheme(previewSettings ?? userSettings)
         applyViewportScale()
+    })
+
+    $effect(() => {
         localStorage.setItem('lm-settings', JSON.stringify(userSettings))
     })
 
@@ -192,13 +196,31 @@
         fetch(`https://LastMenu/ready`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ navMode: userSettings.navMode, targetKey: userSettings.targetKey, uiSounds: userSettings.uiSounds })
+            body: JSON.stringify({ navMode: userSettings.navMode, uiSounds: userSettings.uiSounds, language: userSettings.language })
         })
         window.addEventListener('message', handleMessage)
         window.addEventListener('keydown', handleKeydown)
+
+        // Safety net: if any unhandled JS error occurs while a menu is open,
+        // fire the escape route so the player is never stuck with NUI focus locked.
+        function handleCrash(e) {
+            console.error('[LastMenu] Unhandled error — releasing NUI focus', e)
+            if (stack.length > 0) {
+                fetch(`https://LastMenu/escape`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                }).catch(() => {})
+            }
+        }
+        window.addEventListener('error', handleCrash)
+        window.addEventListener('unhandledrejection', handleCrash)
+
         return () => {
             window.removeEventListener('message', handleMessage)
             window.removeEventListener('keydown', handleKeydown)
+            window.removeEventListener('error', handleCrash)
+            window.removeEventListener('unhandledrejection', handleCrash)
             if (_heapInterval) { clearInterval(_heapInterval); _heapInterval = null }
         }
     })
@@ -212,7 +234,7 @@
     {#if menuItem.menu === 'context'}
         <Context
             menuId={menuItem.id}
-            data={menuItem.data}
+            data={userSettings.pageSize !== null ? { ...menuItem.data, page_size: userSettings.pageSize } : menuItem.data}
             onCallback={sendCallback}
             navMode={userSettings.navMode}
             defaultAnimation={userSettings.animation ?? 'slideLeft'}
@@ -264,16 +286,19 @@
 {#if showSettings}
     <UserSettings
         settings={userSettings}
+        onPreview={(s) => { previewSettings = s }}
         onSave={(s) => {
             userSettings = s
+            previewSettings = null
             showSettings = false
             fetch(`https://LastMenu/settings:update`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ navMode: s.navMode, targetKey: s.targetKey, uiSounds: s.uiSounds })
+                body: JSON.stringify({ navMode: s.navMode, uiSounds: s.uiSounds, language: s.language })
             })
             fetch(`https://LastMenu/settings:close`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
         }}
         onClose={() => {
+            previewSettings = null
             showSettings = false
             fetch(`https://LastMenu/settings:close`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
         }}

@@ -67,12 +67,15 @@ t:button("Repair", {
 | Field | Type | Description |
 |---|---|---|
 | `icon` | `string` | Lucide icon |
-| `gradient` | `bool` | Gradient background (highlights the action) |
+| `color` | `string` | Accent color (hex) for the icon and optional gradient |
+| `gradient` | `bool` | Gradient background using `color` (highlights the action) |
 | `confirm_hold` | `number\|true` | Hold duration in ms (`true` = config value) |
 | `cooldown` | `number` | Recharge in ms after click |
+| `persist_key` | `string` | Stable localStorage key for cooldown persistence — use when the label is dynamic |
 | `condition` | `bool\|function(entity)→bool` | Hidden when `false` |
 | `disabled` | `bool\|function(entity)→bool` | Visible but not clickable |
 | `badge` | `string` | Small text badge shown on the right |
+| `keep_open` | `bool` | Keep the target menu open after callback fires (auto-`true` for toggles, sliders, checkboxes, and when `cooldown` is set) |
 | `cb` | `function(entity)` | Click callback |
 
 ---

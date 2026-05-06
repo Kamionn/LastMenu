@@ -2,41 +2,41 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from '@testing-library/svelte'
 import Progress from '../components/Progress.svelte'
 
-describe('Progress — rendering', () => {
-    it('renders label', () => {
+describe('Progress — rendu', () => {
+    it('affiche le label', () => {
         const { getByText } = render(Progress, {
-            data: { label: 'Loading…', duration: 5000, cancelable: false },
+            data: { label: 'Chargement…', duration: 5000, cancelable: false },
             onCallback: vi.fn(),
         })
-        expect(getByText('Loading…')).toBeInTheDocument()
+        expect(getByText('Chargement…')).toBeInTheDocument()
     })
 
-    it('renders initial percentage', () => {
+    it('affiche le pourcentage initial', () => {
         const { getByText } = render(Progress, {
             data: { label: 'Test', duration: 5000, cancelable: false },
             onCallback: vi.fn(),
         })
-        // setup.ts replaces rAF with setTimeout(cb, 0), so 0% is shown before tick
+        // Le setup.ts remplace rAF par setTimeout(cb, 0), donc 0% affiché avant tick
         expect(getByText(/\d+%/)).toBeInTheDocument()
     })
 
-    it('renders Escape hint when cancelable=true', () => {
+    it("affiche l'indication Échap quand cancelable=true", () => {
         const { getByText } = render(Progress, {
-            data: { label: 'Repair', duration: 5000, cancelable: true },
+            data: { label: 'Réparation', duration: 5000, cancelable: true },
             onCallback: vi.fn(),
         })
-        expect(getByText(/Escape/i)).toBeInTheDocument()
+        expect(getByText(/Échap/i)).toBeInTheDocument()
     })
 
-    it('does not render Escape hint when cancelable=false', () => {
+    it("n'affiche pas l'indication Échap quand cancelable=false", () => {
         const { queryByText } = render(Progress, {
-            data: { label: 'Repair', duration: 5000, cancelable: false },
+            data: { label: 'Réparation', duration: 5000, cancelable: false },
             onCallback: vi.fn(),
         })
-        expect(queryByText(/Escape/i)).not.toBeInTheDocument()
+        expect(queryByText(/Échap/i)).not.toBeInTheDocument()
     })
 
-    it('renders main container', () => {
+    it("affiche le conteneur principal", () => {
         const { container } = render(Progress, {
             data: { label: 'Test', duration: 3000, cancelable: false },
             onCallback: vi.fn(),
@@ -45,32 +45,32 @@ describe('Progress — rendering', () => {
         expect(container.querySelector('.progress-fill')).toBeInTheDocument()
     })
 
-    it('hides label when absent', () => {
+    it("masque le label quand absent", () => {
         const { container } = render(Progress, {
             data: { duration: 3000, cancelable: false },
             onCallback: vi.fn(),
         })
-        // Without label or icon, .progress-label should not render
+        // Sans label ni icon, .progress-label ne doit pas être rendu
         expect(container.querySelector('.progress-label')).not.toBeInTheDocument()
     })
 })
 
-describe('Progress — completion', () => {
+describe('Progress — complétion', () => {
     beforeEach(() => vi.useFakeTimers())
     afterEach(() => vi.useRealTimers())
 
-    it('calls onCallback with cb_complete when duration has elapsed', async () => {
+    it("appelle onCallback avec cb_complete quand la durée est écoulée", async () => {
         const onCallback = vi.fn()
         render(Progress, {
             data: { label: 'Test', duration: 100, cancelable: false, cb_complete: 'cb_done' },
             onCallback,
         })
-        // Advance time so rAF (stubbed as setTimeout 0) + duration are exceeded
+        // Avancer le temps pour que rAF (stubbed comme setTimeout 0) + durée soient dépassés
         vi.advanceTimersByTime(200)
         await Promise.resolve()
-        // In jsdom with stubbed rAF, progress is simulated via setTimeout.
-        // Verifies the callback infrastructure is wired correctly.
-        // In a real env, onCallback would be called after duration ms.
+        // Note: dans jsdom avec rAF stubbed, la progression est simulée par setTimeout.
+        // On vérifie que l'infrastructure de callback est câblée correctement.
+        // En env réel, onCallback serait appelé après duration ms.
         expect(onCallback).toBeDefined()
     })
 })

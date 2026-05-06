@@ -51,6 +51,40 @@ end
 
 RegisterCommand('lm_debug', debugStats, 'lastmenu.dev')
 
+-- ── Debug overlay — draws watcher stats on-screen every frame ─────────────
+local _overlayActive = false
+
+local function _toggleOverlay()
+    _overlayActive = not _overlayActive
+    if not _overlayActive then return end
+    Citizen.CreateThread(function()
+        while _overlayActive do
+            local Reactive = LastMenu.Reactive
+            if Reactive then
+                local state = Reactive.getStats()
+                local y = 0.01
+                for _, watchers in pairs(state) do
+                    for _, w in ipairs(watchers) do
+                        local status = w.disabled and 'DIS' or 'ok '
+                        local line   = ('%s  %-4s  %4dms  %s'):format(
+                            w.field, status, w.interval, w.id:sub(-16))
+                        SetTextFont(4)
+                        SetTextScale(0.3, 0.3)
+                        SetTextColour(255, 255, 80, 220)
+                        SetTextEntry('STRING')
+                        AddTextComponentString(line)
+                        DrawText(0.01, y)
+                        y = y + 0.018
+                    end
+                end
+            end
+            Citizen.Wait(0)
+        end
+    end)
+end
+
+RegisterCommand('lm_overlay', _toggleOverlay, 'lastmenu.dev')
+
 -- ── Internal exports ───────────────────────────────────────────────────────
 
 exports('lastmenu_back', function()
@@ -66,6 +100,7 @@ exports('context_update', UI_Context_Update)
 exports('alert',          UI_Alert)
 exports('alert_build',    UI_Alert_Build)
 exports('alert_async',    UI_AlertAsync)
+exports('confirm_async',  UI_ConfirmAsync)
 exports('notify',         UI_Notify)
 
 -- Progress
@@ -92,5 +127,6 @@ exports('target_remove',     UI_Target_Remove)
 exports('target_clear',      UI_Target_Clear)
 
 -- Observability
-exports('debug_stats', debugStats)
-exports('version',     function() return GetResourceMetadata(GetCurrentResourceName(), 'version', 0) or '1.0.0' end)
+exports('debug_stats',    debugStats)
+exports('debug_overlay',  _toggleOverlay)
+exports('version',        function() return GetResourceMetadata(GetCurrentResourceName(), 'version', 0) or '1.0.0' end)

@@ -66,13 +66,17 @@ rawset(LastMenu, '_stableId', _stableId)
 -- ── Shared builder utilities ─────────────────────────────────────────────────
 
 -- Normalises opts.confirm_hold: true → global default, number → that value, else false.
+-- User's _userHoldDuration (from settings) takes priority over all values when set.
 -- Shared by context.lua and radial.lua.
 ---@param  v boolean|number|nil
 ---@return integer|false
 local function _normalizeHold(v)
-    local cfg = LastMenu.Config
-    if v == true then return cfg.hold_duration or 1500
-    elseif type(v) == 'number' and v > 0 then return v
+    local cfg   = LastMenu.Config
+    local userMs = LastMenu._userHoldDuration  -- number or false
+    if v == true then
+        return (type(userMs) == 'number' and userMs) or cfg.hold_duration or 1500
+    elseif type(v) == 'number' and v > 0 then
+        return (type(userMs) == 'number' and userMs) or v
     end
     return false
 end

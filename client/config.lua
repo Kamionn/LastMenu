@@ -19,7 +19,8 @@ rawset(LastMenu, 'EasySwitch', EasySwitch)
 ---@class LM.Config
 ---@field debug               boolean         Reactive engine stats every 60 ticks (F8 console).
 ---@field debugTarget         boolean         Draw target zones in-world.
----@field target_hold_key     integer         FiveM control ID for the targeting reticle.
+---@field settings_key        string          Default key binding for the settings panel (RegisterKeyMapping identifier). See https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/keyboard/
+---@field target_key          string          Default key binding for the target hold mechanic (RegisterKeyMapping identifier).
 ---@field target_max_distance number          Maximum raycast distance for the target system (metres). Raise this if you register targets with distance > 10.
 ---@field close_on_distance   number|nil      Auto-close menu when player walks this many units away. nil = disabled.
 ---@field max_stack_depth     integer         Max simultaneously stacked menus (extra pushes are silently dropped).
@@ -29,7 +30,8 @@ rawset(LastMenu, 'EasySwitch', EasySwitch)
 local Config = {}
 Config.debug               = false
 Config.debugTarget         = false
-Config.target_hold_key     = 36       -- INPUT_DUCK (Left Ctrl)
+Config.settings_key        = 'F12'    -- default binding for the settings panel  (F1-F12, LMENU, LCONTROL…)
+Config.target_key          = 'LMENU' -- default binding for the target hold key (Left Alt)
 Config.target_max_distance = 10.0     -- metres; raise if registrations use distance > 10
 Config.close_on_distance   = nil
 Config.max_stack_depth     = 10

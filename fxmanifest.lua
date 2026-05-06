@@ -4,7 +4,7 @@ game 'gta5'
 name        'LastMenu'
 description 'Universal menu system for FiveM'
 author    '𝖪𝖺𝗆𝗂𝗈𝗇'
-version     '1.0.1'
+version     '1.0.2'
 
 server_scripts {
     'server/version.lua',

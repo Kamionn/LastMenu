@@ -144,14 +144,17 @@ Each entry in `opts.actions` supports:
 |---|---|---|
 | `label` | `string` | Button text |
 | `icon` | `string` | Lucide icon |
+| `color` | `string` | Accent color (hex) applied to the icon and optional gradient |
 | `cb` | `function(entity)` | Called on click. `entity` = entity handle (or `nil` for zones) |
 | `condition` | `bool\|function(entity) → bool` | Hide the action when `false` (preferred alias for `visible`) |
 | `visible` | `bool\|function(entity) → bool` | Hide the action when `false` |
 | `disabled` | `bool\|function(entity) → bool` | Show grayed-out, no callback |
-| `gradient` | `bool` | Gradient background on the action button |
+| `gradient` | `bool` | Gradient background on the action button (uses `color` if set) |
 | `badge` | `string` | Small text badge on the right |
 | `confirm_hold` | `number\|true` | Hold-to-confirm duration in ms |
 | `cooldown` | `number` | Recharge delay in ms after click |
+| `persist_key` | `string` | Stable localStorage key for cooldown persistence — use when the action label is dynamic |
+| `keep_open` | `bool` | Keep the target menu open after the callback fires (auto-`true` for toggles, sliders, checkboxes, and when `cooldown` is set) |
 
 `condition` takes priority over `visible` when both are set. Both accept static booleans or callables evaluated each time the action menu is opened.
 

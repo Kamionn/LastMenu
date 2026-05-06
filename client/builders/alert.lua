@@ -95,6 +95,21 @@ function UI_Alert_Build(fn)
     }
 end
 
+-- One-liner async confirm. Wraps UI_AlertAsync with pre-filled confirm/cancel buttons.
+---@param message string
+---@param opts?   { type?: string, confirm_label?: string, cancel_label?: string, title?: string }
+---@return boolean
+function UI_ConfirmAsync(message, opts)
+    opts = opts or {}
+    return UI_AlertAsync(function(b)
+        if opts.title then b:title(opts.title) end
+        b:message(message)
+        b:type(opts.type or 'confirm')
+        if opts.confirm_label then b:confirm_label(opts.confirm_label) end
+        if opts.cancel_label  then b:cancel_label(opts.cancel_label)  end
+    end)
+end
+
 -- Async variant — blocks the current coroutine until confirmed or cancelled.
 -- Must be called from a Citizen.CreateThread.
 ---@param fn fun(b: table)

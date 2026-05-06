@@ -104,6 +104,12 @@
     padding-top: 2px;
 }
 
+.toast-title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .toast-title {
     font-size: var(--ui-font-size-base, 13px);
     font-family: var(--ui-font-heading, var(--ui-font-body));
@@ -111,6 +117,17 @@
     letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--ui-ctx-text-title, #fff);
+}
+
+.toast-count {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 8px;
+    background: var(--c);
+    color: var(--ui-accent-text, #000);
+    opacity: 0.9;
+    letter-spacing: 0.03em;
 }
 
 .toast-message {

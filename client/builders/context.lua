@@ -121,14 +121,10 @@ local function _buildContext(id, fn)
             end
         end
 
+        local keepOpen = opts.keep_open ~= false
+
         if opts.cb then
-            local userCb   = opts.cb
-            local keepOpen
-            if opts.keep_open ~= nil then
-                keepOpen = opts.keep_open == true
-            else
-                keepOpen = true
-            end
+            local userCb = opts.cb
             Bridge.onCallback(cb_id, function(data)
                 if not keepOpen then Stack.pop() end
                 userCb(data)
@@ -151,7 +147,7 @@ local function _buildContext(id, fn)
             persist_key  = opts.persist_key  or nil,
             cooldown_key = cd_key,
             cd_expiry    = cd_expiry,
-            keep_open    = opts.keep_open ~= false,
+            keep_open    = keepOpen,
             preview      = resolvedPreview,
             visible      = resolvedVisible,
             disabled     = resolvedDisabled,
@@ -257,10 +253,10 @@ local function _buildContext(id, fn)
 
     function b:stat(label, valueOrOpts, maxOrNil, optsOrNil)
         local opts, value, max
-        if type(valueOrOpts) == 'number' or type(valueOrOpts) == 'function' or type(valueOrOpts) == 'funcref' then
-            value = valueOrOpts; max = maxOrNil; opts = optsOrNil or {}
+        if type(valueOrOpts) == 'table' then
+            opts = valueOrOpts; value = opts.value; max = opts.max
         else
-            opts = valueOrOpts or {}; value = opts.value; max = opts.max
+            value = valueOrOpts; max = maxOrNil; opts = optsOrNil or {}
         end
 
         local stat_id = opts.id or sid(label, 'stat')

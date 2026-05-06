@@ -1,5 +1,5 @@
 import { untrack } from 'svelte'
-import { Palette, Mouse, List, Bell, Square, Activity, Eye, Zap, Globe } from 'lucide-svelte'
+import { Palette, Mouse, Layers, Eye, Globe } from 'lucide-svelte'
 import { SETTINGS_DEFAULTS, AVAILABLE_THEMES } from '../../utils/theme'
 import { TRANSLATIONS, LANGUAGES } from '../../i18n/translations'
 
@@ -14,9 +14,14 @@ export function useUserSettings(
     getSettings: () => any,
     onSave: (s: any) => void,
     onClose: () => void,
+    onPreview?: ((s: any) => void) | null,
 ) {
     let local          = $state(untrack(() => ({ ...getSettings() })))
-    let activeSection  = $state('navigation')
+
+    $effect(() => {
+        onPreview?.(local)
+    })
+    let activeSection  = $state('appearance')
     let exportFeedback = $state('')
     let importFeedback = $state('')
     let importError    = $state('')
@@ -29,15 +34,11 @@ export function useUserSettings(
     const t = $derived(TRANSLATIONS[local.language ?? 'en'] ?? TRANSLATIONS['en'])
 
     const SECTIONS = $derived([
-        { id: 'appearance', label: t.sec_appearance, Icon: Palette  },
-        { id: 'navigation', label: t.sec_nav,        Icon: Mouse    },
-        { id: 'context',    label: t.sec_context,    Icon: List     },
-        { id: 'notify',     label: t.sec_notify,     Icon: Bell     },
-        { id: 'modal',      label: t.sec_modal,      Icon: Square   },
-        { id: 'progress',   label: t.sec_progress,   Icon: Activity },
-        { id: 'access',     label: t.sec_access,     Icon: Eye      },
-        { id: 'perf',       label: t.sec_perf,       Icon: Zap      },
-        { id: 'lang',       label: t.sec_lang,       Icon: Globe    },
+        { id: 'appearance',  label: t.sec_appearance,  Icon: Palette },
+        { id: 'navigation',  label: t.sec_nav,         Icon: Mouse   },
+        { id: 'components',  label: t.sec_components,  Icon: Layers  },
+        { id: 'access',      label: t.sec_access,      Icon: Eye     },
+        { id: 'lang',        label: t.sec_lang,        Icon: Globe   },
     ])
 
     function resetPosition() {
@@ -63,6 +64,10 @@ export function useUserSettings(
 
     function handleSave() {
         onSave(local)
+    }
+
+    function resetSettings() {
+        local = { ...SETTINGS_DEFAULTS }
     }
 
     // ── Export ──────────────────────────────────────────────────────────────
@@ -148,7 +153,6 @@ export function useUserSettings(
             compactMode:    () => t.compact_mode,
             blurEffects:    () => t.blur_effects,
             navMode:        () => t.nav_mode,
-            targetKey:      () => t.target_key,
             uiSounds:       () => t.ui_sounds,
             animation:      () => t.anim,
             notifyX:        () => t.notif_h,
@@ -164,6 +168,9 @@ export function useUserSettings(
             perfMode:       () => t.perf_mode,
             borderRadius:   () => t.border_radius,
             language:       () => t.lang_label,
+            pageSize:       () => t.page_size,
+            radialSize:     () => t.radial_size,
+            targetSize:     () => t.target_size,
         }
         const rows: ImportDiffRow[] = []
         for (const key of Object.keys(LABELS)) {
@@ -225,6 +232,7 @@ export function useUserSettings(
         LANGUAGES,
         THEMES: AVAILABLE_THEMES,
         resetPosition,
+        resetSettings,
         handleBackdrop,
         handleKeydown,
         handleColorInput,

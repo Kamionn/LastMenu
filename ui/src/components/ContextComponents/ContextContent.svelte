@@ -198,6 +198,15 @@
     let inputRefs     = $state({})
     let dateFieldRefs = $state({})
 
+    function playSound(event: string): void {
+        if (!uiSounds) return
+        fetch('https://LastMenu/sound', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event })
+        })
+    }
+
     function fireDateCb(itemId, df) {
         if (df) onCallback(itemId, { value: composeDateISO(df.d, df.m, df.y) })
     }
@@ -258,7 +267,7 @@
             const p = Math.min(1, (now - holdStart) / duration)
             holdState = { id: item.id, progress: p }
             if (p < 1) holdRAF = requestAnimationFrame(tick)
-            else { holdState = { id: null, progress: 0 }; onCallback(item.id); cd.startCooldown(item) }
+            else { holdState = { id: null, progress: 0 }; playSound('select'); onCallback(item.id); cd.startCooldown(item) }
         }
         holdRAF = requestAnimationFrame(tick)
     }
@@ -369,6 +378,7 @@
         getItemsListRef:  () => itemsListRef,
         PRESET_COLORS,
         onCallback: (...args) => onCallback(...args),
+        playSound,
         cd,
         startHold,
         cancelHold,
@@ -410,6 +420,7 @@
         get PRESET_COLORS()       { return PRESET_COLORS },
         get onCallback()          { return onCallback },
         set containerClientHeight(v) { vs.containerClientHeight = v },
+        playSound,
         isCooling: cd.isCooling, cdRemaining: cd.cdRemaining, statColor, safeCss, safeUrl,
         parseDateFields, getDateFieldOrder, composeDateISO, fireDateCb,
         startHold, cancelHold, stepSlider, stepStepper,

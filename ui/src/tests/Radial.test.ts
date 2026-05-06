@@ -15,72 +15,72 @@ const btn = (id: string, label: string, overrides = {}) => ({
 const baseData = {
     center_label: 'Actions',
     buttons: [
-        btn('cb_repair',  'Repair'),
-        btn('cb_clean',   'Clean'),
-        btn('cb_inspect', 'Inspect'),
+        btn('cb_repair',  'Réparer'),
+        btn('cb_clean',   'Nettoyer'),
+        btn('cb_inspect', 'Inspecter'),
     ],
 }
 
-describe('Radial — rendering', () => {
-    it('renders center_label when no sector is selected', () => {
+describe('Radial — rendu', () => {
+    it('affiche le center_label quand aucun secteur n\'est sélectionné', () => {
         const { getByText } = render(Radial, { data: baseData, onCallback: vi.fn() })
         expect(getByText('Actions')).toBeInTheDocument()
     })
 
-    it('renders labels of all visible buttons', () => {
+    it('affiche les labels de tous les boutons visibles', () => {
         const { getByText } = render(Radial, { data: baseData, onCallback: vi.fn() })
-        expect(getByText('Repair')).toBeInTheDocument()
-        expect(getByText('Clean')).toBeInTheDocument()
-        expect(getByText('Inspect')).toBeInTheDocument()
+        expect(getByText('Réparer')).toBeInTheDocument()
+        expect(getByText('Nettoyer')).toBeInTheDocument()
+        expect(getByText('Inspecter')).toBeInTheDocument()
     })
 
-    it('does not render invisible buttons (visible=false)', () => {
+    it("n'affiche pas les boutons invisible (visible=false)", () => {
         const data = {
             ...baseData,
             buttons: [
                 btn('cb_a', 'Visible'),
-                btn('cb_b', 'Hidden', { visible: false }),
+                btn('cb_b', 'Caché', { visible: false }),
             ],
         }
         const { getByText, queryByText } = render(Radial, { data, onCallback: vi.fn() })
         expect(getByText('Visible')).toBeInTheDocument()
-        expect(queryByText('Hidden')).not.toBeInTheDocument()
+        expect(queryByText('Caché')).not.toBeInTheDocument()
     })
 
-    it('renders SVG container', () => {
+    it('affiche le conteneur SVG', () => {
         const { container } = render(Radial, { data: baseData, onCallback: vi.fn() })
         expect(container.querySelector('.radial-svg')).toBeInTheDocument()
     })
 
-    it('renders center dot when center_label is absent', () => {
+    it('affiche un point central quand center_label est absent', () => {
         const data = { ...baseData, center_label: undefined }
         const { container } = render(Radial, { data, onCallback: vi.fn() })
         expect(container.querySelector('.center-dot')).toBeInTheDocument()
     })
 
-    it('applies is-closing class when closing=true', () => {
+    it('applique la classe is-closing quand closing=true', () => {
         const { container } = render(Radial, { data: baseData, onCallback: vi.fn(), closing: true })
         expect(container.querySelector('.radial-overlay')).toHaveClass('is-closing')
     })
 })
 
-describe('Radial — keyboard navigation', () => {
-    it('ArrowRight selects first button', async () => {
+describe('Radial — navigation clavier', () => {
+    it('ArrowRight sélectionne le premier bouton', async () => {
         const { getByText } = render(Radial, { data: baseData, onCallback: vi.fn() })
         await fireEvent.keyDown(window, { key: 'ArrowRight' })
-        // First selected button appears in .center-area
-        expect(getByText('Repair')).toBeInTheDocument()
+        // Le premier bouton sélectionné apparaît dans .center-area
+        expect(getByText('Réparer')).toBeInTheDocument()
     })
 
-    it('ArrowRight then ArrowRight selects second button', async () => {
+    it('ArrowRight puis ArrowRight sélectionne le deuxième bouton', async () => {
         const onCallback = vi.fn()
         const { getByText } = render(Radial, { data: baseData, onCallback })
         await fireEvent.keyDown(window, { key: 'ArrowRight' })
         await fireEvent.keyDown(window, { key: 'ArrowRight' })
-        expect(getByText('Clean')).toBeInTheDocument()
+        expect(getByText('Nettoyer')).toBeInTheDocument()
     })
 
-    it('Enter on selected button calls onCallback', async () => {
+    it('Entrée sur un bouton sélectionné appelle onCallback', async () => {
         const onCallback = vi.fn()
         render(Radial, { data: baseData, onCallback })
         await fireEvent.keyDown(window, { key: 'ArrowRight' })
@@ -88,7 +88,7 @@ describe('Radial — keyboard navigation', () => {
         expect(onCallback).toHaveBeenCalledWith('cb_repair')
     })
 
-    it('Space on selected button calls onCallback', async () => {
+    it('Espace sur un bouton sélectionné appelle onCallback', async () => {
         const onCallback = vi.fn()
         render(Radial, { data: baseData, onCallback })
         await fireEvent.keyDown(window, { key: 'ArrowRight' })
@@ -96,7 +96,7 @@ describe('Radial — keyboard navigation', () => {
         expect(onCallback).toHaveBeenCalledWith('cb_repair')
     })
 
-    it('Tab cycles through buttons', async () => {
+    it('Tab cycle entre les boutons', async () => {
         const onCallback = vi.fn()
         render(Radial, { data: baseData, onCallback })
         await fireEvent.keyDown(window, { key: 'Tab' })
@@ -104,30 +104,30 @@ describe('Radial — keyboard navigation', () => {
         expect(onCallback).toHaveBeenCalledOnce()
     })
 
-    it('Enter with no selection (kbIndex=-1, selectedIndex=-1) does not throw', async () => {
+    it('Entrée sans sélection (kbIndex=-1, selectedIndex=-1) ne plante pas', async () => {
         const onCallback = vi.fn()
         render(Radial, { data: baseData, onCallback })
         await expect(fireEvent.keyDown(window, { key: 'Enter' })).resolves.toBeDefined()
         expect(onCallback).not.toHaveBeenCalled()
     })
 
-    it('skips disabled buttons during keyboard cycle', async () => {
+    it('saute les boutons disabled lors du cycle clavier', async () => {
         const onCallback = vi.fn()
         const data = {
             ...baseData,
             buttons: [
-                btn('cb_a', 'Active'),
-                btn('cb_b', 'Disabled', { disabled: true }),
-                btn('cb_c', 'Also active'),
+                btn('cb_a', 'Actif'),
+                btn('cb_b', 'Désactivé', { disabled: true }),
+                btn('cb_c', 'Aussi actif'),
             ],
         }
         render(Radial, { data, onCallback })
-        // First ArrowRight → 'Active' (index 0)
+        // Premier ArrowRight → 'Actif' (index 0)
         await fireEvent.keyDown(window, { key: 'ArrowRight' })
         await fireEvent.keyDown(window, { key: 'Enter' })
         expect(onCallback).toHaveBeenCalledWith('cb_a')
 
-        // Second ArrowRight → skips 'Disabled', lands on 'Also active'
+        // Deuxième ArrowRight → saute 'Désactivé', arrive sur 'Aussi actif'
         onCallback.mockClear()
         await fireEvent.keyDown(window, { key: 'ArrowRight' })
         await fireEvent.keyDown(window, { key: 'Enter' })
@@ -135,19 +135,19 @@ describe('Radial — keyboard navigation', () => {
     })
 })
 
-describe('Radial — edge cases', () => {
-    it('mounts without error with zero buttons', () => {
-        const data = { center_label: 'Empty', buttons: [] }
+describe('Radial — cas limites', () => {
+    it('se monte sans erreur avec zéro boutons', () => {
+        const data = { center_label: 'Vide', buttons: [] }
         expect(() => render(Radial, { data, onCallback: vi.fn() })).not.toThrow()
     })
 
-    it('mounts without error with a single button', () => {
-        const data = { buttons: [btn('cb_only', 'Solo')] }
+    it('se monte sans erreur avec un seul bouton', () => {
+        const data = { buttons: [btn('cb_only', 'Seul')] }
         const { getByText } = render(Radial, { data, onCallback: vi.fn() })
-        expect(getByText('Solo')).toBeInTheDocument()
+        expect(getByText('Seul')).toBeInTheDocument()
     })
 
-    it('mounts without error with 8 buttons', () => {
+    it('se monte sans erreur avec 8 boutons', () => {
         const buttons = Array.from({ length: 8 }, (_, i) => btn(`cb_${i}`, `Action ${i}`))
         const { container } = render(Radial, { data: { buttons }, onCallback: vi.fn() })
         expect(container.querySelectorAll('.sector-icon')).toHaveLength(8)

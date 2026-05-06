@@ -1,5 +1,8 @@
 interface DragStart { mx: number; my: number; ox: number; oy: number }
 
+const DESIGN_W = 1920
+const DESIGN_H = 1080
+
 /**
  * Drag-to-reposition composable for the Context menu.
  * Position is persisted in localStorage, scoped by menuId to avoid collisions
@@ -10,14 +13,15 @@ export function useContextDrag(getActive: () => boolean, _menuId: string = '') {
     const _keyY = 'lm-pos-y'
 
     let pos = $state({
-        x: Math.max(0, parseInt(localStorage.getItem(_keyX) || '16')),
-        y: Math.max(0, parseInt(localStorage.getItem(_keyY) || '72')),
+        x: Math.max(0, Math.min(DESIGN_W - 40, parseInt(localStorage.getItem(_keyX) || '16'))),
+        y: Math.max(0, Math.min(DESIGN_H - 40, parseInt(localStorage.getItem(_keyY) || '72'))),
     })
 
     let dragging  = $state(false)
     let dragStart: DragStart | null = null
 
-    const previewOnLeft = $derived(pos.x + 320 > window.innerWidth / 2)
+    // body.clientWidth reflects zoom-adjusted layout width = design width at any resolution
+    const previewOnLeft = $derived(pos.x + 320 > document.body.clientWidth / 2)
 
     function startDrag(e: MouseEvent): void {
         if (e.button !== 0) return
@@ -28,6 +32,7 @@ export function useContextDrag(getActive: () => boolean, _menuId: string = '') {
 
     function onWinMouseMove(e: MouseEvent): void {
         if (!getActive() || !dragging || !dragStart) return
+        // css zoom on <html> adjusts e.clientX into zoom-space automatically — no ratio needed
         pos = {
             x: Math.max(0, dragStart.ox + e.clientX - dragStart.mx),
             y: Math.max(0, dragStart.oy + e.clientY - dragStart.my),

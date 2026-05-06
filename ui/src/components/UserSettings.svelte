@@ -4,9 +4,9 @@
     import { X, RotateCcw, Type, Play, Palette, Eye, Globe, Check, Upload, Copy, ArrowRight } from 'lucide-svelte'
     import { useUserSettings } from './UserSettingsComponents/useUserSettings.svelte.ts'
 
-    let { settings, onSave, onClose } = $props()
+    let { settings, onSave, onClose, onPreview = null } = $props()
 
-    const s = useUserSettings(() => settings, (v) => onSave(v), () => onClose())
+    const s = useUserSettings(() => settings, (v) => onSave(v), () => onClose(), onPreview)
 </script>
 
 <svelte:window onkeydown={s.handleKeydown} />
@@ -159,6 +159,18 @@
                     </div>
 
                     <div class="sp-section">
+                        <button class="sp-toggle-row sp-toggle-row--highlight" onclick={() => s.local.perfMode = !s.local.perfMode}>
+                            <div class="sp-toggle-text">
+                                <span class="sp-toggle-name">{s.t.perf_mode}</span>
+                                <span class="sp-hint" style="margin-top:0">{s.t.perf_mode_hint}</span>
+                            </div>
+                            <div class="toggle-track" class:is-on={s.local.perfMode}>
+                                <div class="toggle-knob"></div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="sp-section">
                         <div class="sp-label"><Type size={12}/> {s.t.font_size} — {s.local.fontSize ?? 100}%</div>
                         <div class="font-row">
                             <span class="font-sm">A</span>
@@ -188,25 +200,6 @@
                                 </button>
                             {/each}
                         </div>
-                        <p class="sp-hint">{s.t.nav_hint}</p>
-                    </div>
-
-                    <div class="sp-section">
-                        <div class="sp-label">{s.t.target_key}</div>
-                        <div class="opts-col">
-                            {#each [
-                                { value: 36, label: 'Left Ctrl' },
-                                { value: 38, label: 'E' },
-                                { value: 47, label: 'G' },
-                                { value: 20, label: 'Z' },
-                            ] as opt}
-                                <button class="opt-btn" class:is-active={s.local.targetKey === opt.value}
-                                    onclick={() => s.local.targetKey = opt.value}>
-                                    {opt.label}
-                                </button>
-                            {/each}
-                        </div>
-                        <p class="sp-hint">{s.t.target_key_hint}</p>
                     </div>
 
                     <div class="sp-section">
@@ -221,114 +214,197 @@
                         </button>
                     </div>
 
-                <!-- ── CONTEXT ─────────────────────────────────────── -->
-                {:else if s.activeSection === 'context'}
+                <!-- ── COMPONENTS ─────────────────────────────────── -->
+                {:else if s.activeSection === 'components'}
 
-                    <div class="sp-section">
-                        <div class="sp-label"><Play size={12}/> {s.t.anim}</div>
-                        <div class="opts-col">
-                            {#each [
-                                { value: 'slideLeft',  label: s.t.anim_sl },
-                                { value: 'slideRight', label: s.t.anim_sr },
-                                { value: 'fade',       label: s.t.anim_fade },
-                                { value: 'scale',      label: s.t.anim_scale },
-                                { value: 'none',       label: s.t.anim_none },
-                            ] as opt}
-                                <button class="opt-btn" class:is-active={s.local.animation === opt.value}
-                                    onclick={() => s.local.animation = opt.value}>
-                                    {opt.label}
-                                </button>
-                            {/each}
+                    <!-- Context menu -->
+                    <div class="sp-group-title">{s.t.comp_context}</div>
+                    <div class="sp-group">
+                        <div class="sp-section">
+                            <div class="sp-label"><Play size={12}/> {s.t.anim}</div>
+                            <div class="opts-col">
+                                {#each [
+                                    { value: 'slideLeft',  label: s.t.anim_sl },
+                                    { value: 'slideRight', label: s.t.anim_sr },
+                                    { value: 'fade',       label: s.t.anim_fade },
+                                    { value: 'scale',      label: s.t.anim_scale },
+                                    { value: 'none',       label: s.t.anim_none },
+                                ] as opt}
+                                    <button class="opt-btn" class:is-active={s.local.animation === opt.value}
+                                        onclick={() => s.local.animation = opt.value}>
+                                        {opt.label}
+                                    </button>
+                                {/each}
+                            </div>
                         </div>
-                        <p class="sp-hint">{s.t.anim_hint}</p>
-                    </div>
 
-                    <div class="sp-section">
-                        <div class="sp-label">{s.t.pos_label}</div>
-                        <button class="reset-btn" onclick={s.resetPosition}>
-                            <RotateCcw size={11}/> {s.t.pos_reset}
-                        </button>
-                        <p class="sp-hint">{s.t.pos_hint}</p>
-                    </div>
-
-                <!-- ── NOTIFY ──────────────────────────────────────── -->
-                {:else if s.activeSection === 'notify'}
-
-                    <div class="sp-section">
-                        <div class="sp-label">{s.t.notif_h}</div>
-                        <div class="opts-row">
-                            {#each [
-                                { value: 'right', label: s.t.right },
-                                { value: 'left',  label: s.t.left },
-                            ] as opt}
-                                <button class="opt-btn" class:is-active={(s.local.notifyX ?? 'right') === opt.value}
-                                    onclick={() => s.local.notifyX = opt.value}>
-                                    {opt.label}
+                        <div class="sp-section">
+                            <div class="sp-label">{s.t.page_size}
+                                {#if s.local.pageSize !== null && s.local.pageSize !== undefined}
+                                    — {s.local.pageSize}
+                                {:else}
+                                    — {s.t.auto_label}
+                                {/if}
+                            </div>
+                            {#if s.local.pageSize !== null && s.local.pageSize !== undefined}
+                                <div class="font-row">
+                                    <span class="font-sm">3</span>
+                                    <input type="range" min="3" max="20" step="1"
+                                        bind:value={s.local.pageSize}
+                                        style="--pct:{s.sliderPct(s.local.pageSize, 3, 20)}%"
+                                        class="slider" />
+                                    <span class="font-lg">20</span>
+                                </div>
+                                <button class="reset-btn" onclick={() => s.local.pageSize = null}>
+                                    <RotateCcw size={11}/> {s.t.auto_label}
                                 </button>
-                            {/each}
+                            {:else}
+                                <button class="opt-btn" style="width:fit-content"
+                                    onclick={() => s.local.pageSize = 8}>
+                                    {s.t.border_radius_custom}
+                                </button>
+                            {/if}
+                            <p class="sp-hint">{s.t.page_size_hint}</p>
                         </div>
-                    </div>
 
-                    <div class="sp-section">
-                        <div class="sp-label">{s.t.notif_v}</div>
-                        <div class="opts-row">
-                            {#each [
-                                { value: 'bottom', label: s.t.bottom },
-                                { value: 'top',    label: s.t.top },
-                            ] as opt}
-                                <button class="opt-btn" class:is-active={(s.local.notifyY ?? 'bottom') === opt.value}
-                                    onclick={() => s.local.notifyY = opt.value}>
-                                    {opt.label}
-                                </button>
-                            {/each}
-                        </div>
-                    </div>
-
-                    <div class="sp-section">
-                        <div class="sp-label">{s.t.notif_dur} — {s.local.notifyDuration ?? 4000}ms</div>
-                        <input type="range" min="1500" max="10000" step="500"
-                            bind:value={s.local.notifyDuration}
-                            style="--pct:{s.sliderPct(s.local.notifyDuration ?? 4000, 1500, 10000)}%"
-                            class="slider" />
-                        <p class="sp-hint">{s.t.notif_dur_hint}</p>
-                    </div>
-
-                <!-- ── MODAL ───────────────────────────────────────── -->
-                {:else if s.activeSection === 'modal'}
-
-                    <div class="sp-section">
-                        <div class="sp-label">{s.t.modal_align}</div>
-                        <div class="opts-col">
-                            {#each [
-                                { value: 'center',        label: s.t.modal_center },
-                                { value: 'top-center',    label: s.t.modal_top },
-                                { value: 'bottom-center', label: s.t.modal_bottom },
-                            ] as opt}
-                                <button class="opt-btn" class:is-active={(s.local.modalAlign ?? 'center') === opt.value}
-                                    onclick={() => s.local.modalAlign = opt.value}>
-                                    {opt.label}
-                                </button>
-                            {/each}
+                        <div class="sp-section">
+                            <div class="sp-label">{s.t.pos_label}</div>
+                            <button class="reset-btn" onclick={s.resetPosition}>
+                                <RotateCcw size={11}/> {s.t.pos_reset}
+                            </button>
+                            <p class="sp-hint">{s.t.pos_hint}</p>
                         </div>
                     </div>
 
-                <!-- ── PROGRESS ────────────────────────────────────── -->
-                {:else if s.activeSection === 'progress'}
+                    <!-- Notifications -->
+                    <div class="sp-group-title">{s.t.comp_notify}</div>
+                    <div class="sp-group">
+                        <div class="sp-section">
+                            <div class="sp-label">{s.t.notif_h}</div>
+                            <div class="opts-row">
+                                {#each [
+                                    { value: 'right', label: s.t.right },
+                                    { value: 'left',  label: s.t.left },
+                                ] as opt}
+                                    <button class="opt-btn" class:is-active={(s.local.notifyX ?? 'right') === opt.value}
+                                        onclick={() => s.local.notifyX = opt.value}>
+                                        {opt.label}
+                                    </button>
+                                {/each}
+                            </div>
+                        </div>
 
-                    <div class="sp-section">
-                        <div class="sp-label">{s.t.prog_pos}</div>
-                        <div class="opts-col">
-                            {#each [
-                                { value: 'bottom-center', label: s.t.prog_bc },
-                                { value: 'top-center',    label: s.t.prog_tc },
-                                { value: 'bottom-left',   label: s.t.prog_bl },
-                                { value: 'bottom-right',  label: s.t.prog_br },
-                            ] as opt}
-                                <button class="opt-btn" class:is-active={(s.local.progressPos ?? 'bottom-center') === opt.value}
-                                    onclick={() => s.local.progressPos = opt.value}>
-                                    {opt.label}
+                        <div class="sp-section">
+                            <div class="sp-label">{s.t.notif_v}</div>
+                            <div class="opts-row">
+                                {#each [
+                                    { value: 'bottom', label: s.t.bottom },
+                                    { value: 'top',    label: s.t.top },
+                                ] as opt}
+                                    <button class="opt-btn" class:is-active={(s.local.notifyY ?? 'bottom') === opt.value}
+                                        onclick={() => s.local.notifyY = opt.value}>
+                                        {opt.label}
+                                    </button>
+                                {/each}
+                            </div>
+                        </div>
+
+                        <div class="sp-section">
+                            <div class="sp-label">{s.t.notif_dur} — {s.local.notifyDuration ?? 4000}ms</div>
+                            <input type="range" min="1500" max="10000" step="500"
+                                bind:value={s.local.notifyDuration}
+                                style="--pct:{s.sliderPct(s.local.notifyDuration ?? 4000, 1500, 10000)}%"
+                                class="slider" />
+                            <p class="sp-hint">{s.t.notif_dur_hint}</p>
+                        </div>
+                    </div>
+
+                    <!-- Radial -->
+                    <div class="sp-group-title">{s.t.comp_radial}</div>
+                    <div class="sp-group">
+                        <div class="sp-section">
+                            <div class="sp-label">{s.t.radial_size}</div>
+                            <div class="opts-col">
+                                <button class="opt-btn" class:is-active={s.local.radialSize === null}
+                                    onclick={() => s.local.radialSize = null}>
+                                    {s.t.auto_label}
                                 </button>
-                            {/each}
+                                {#each [
+                                    { value: 'compact', label: s.t.size_compact },
+                                    { value: 'normal',  label: s.t.size_normal },
+                                    { value: 'large',   label: s.t.size_large },
+                                ] as opt}
+                                    <button class="opt-btn" class:is-active={s.local.radialSize === opt.value}
+                                        onclick={() => s.local.radialSize = opt.value}>
+                                        {opt.label}
+                                    </button>
+                                {/each}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Target -->
+                    <div class="sp-group-title">{s.t.comp_target}</div>
+                    <div class="sp-group">
+                        <div class="sp-section">
+                            <div class="sp-label">{s.t.target_size}</div>
+                            <div class="opts-col">
+                                <button class="opt-btn" class:is-active={s.local.targetSize === null}
+                                    onclick={() => s.local.targetSize = null}>
+                                    {s.t.auto_label}
+                                </button>
+                                {#each [
+                                    { value: 'compact', label: s.t.size_compact },
+                                    { value: 'normal',  label: s.t.size_normal },
+                                    { value: 'large',   label: s.t.size_large },
+                                ] as opt}
+                                    <button class="opt-btn" class:is-active={s.local.targetSize === opt.value}
+                                        onclick={() => s.local.targetSize = opt.value}>
+                                        {opt.label}
+                                    </button>
+                                {/each}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal -->
+                    <div class="sp-group-title">{s.t.comp_modal}</div>
+                    <div class="sp-group">
+                        <div class="sp-section">
+                            <div class="sp-label">{s.t.modal_align}</div>
+                            <div class="opts-col">
+                                {#each [
+                                    { value: 'center',        label: s.t.modal_center },
+                                    { value: 'top-center',    label: s.t.modal_top },
+                                    { value: 'bottom-center', label: s.t.modal_bottom },
+                                ] as opt}
+                                    <button class="opt-btn" class:is-active={(s.local.modalAlign ?? 'center') === opt.value}
+                                        onclick={() => s.local.modalAlign = opt.value}>
+                                        {opt.label}
+                                    </button>
+                                {/each}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div class="sp-group-title">{s.t.comp_progress}</div>
+                    <div class="sp-group">
+                        <div class="sp-section">
+                            <div class="sp-label">{s.t.prog_pos}</div>
+                            <div class="opts-col">
+                                {#each [
+                                    { value: 'bottom-center', label: s.t.prog_bc },
+                                    { value: 'top-center',    label: s.t.prog_tc },
+                                    { value: 'bottom-left',   label: s.t.prog_bl },
+                                    { value: 'bottom-right',  label: s.t.prog_br },
+                                ] as opt}
+                                    <button class="opt-btn" class:is-active={(s.local.progressPos ?? 'bottom-center') === opt.value}
+                                        onclick={() => s.local.progressPos = opt.value}>
+                                        {opt.label}
+                                    </button>
+                                {/each}
+                            </div>
                         </div>
                     </div>
 
@@ -405,21 +481,6 @@
                         <p class="sp-hint">{s.t.hover_delay_hint}</p>
                     </div>
 
-                <!-- ── GAMEPLAY / PERFORMANCE ─────────────────────── -->
-                {:else if s.activeSection === 'perf'}
-
-                    <div class="sp-section">
-                        <button class="sp-toggle-row sp-toggle-row--highlight" onclick={() => s.local.perfMode = !s.local.perfMode}>
-                            <div class="sp-toggle-text">
-                                <span class="sp-toggle-name">{s.t.perf_mode}</span>
-                                <span class="sp-hint" style="margin-top:0">{s.t.perf_mode_hint}</span>
-                            </div>
-                            <div class="toggle-track" class:is-on={s.local.perfMode}>
-                                <div class="toggle-knob"></div>
-                            </div>
-                        </button>
-                    </div>
-
                 <!-- ── LANGUAGE ────────────────────────────────────── -->
                 {:else if s.activeSection === 'lang'}
 
@@ -457,6 +518,9 @@
                     {:else}
                         <Upload size={12}/> {s.t.import_btn}
                     {/if}
+                </button>
+                <button class="btn-io btn-io--danger btn-io--icon" onclick={s.resetSettings} title={s.t.reset_all_confirm}>
+                    <RotateCcw size={13}/>
                 </button>
                 {#if s.importError}
                     <span class="io-error">{s.importError}</span>

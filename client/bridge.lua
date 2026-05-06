@@ -28,9 +28,7 @@ Bridge.onReady    = nil
 local _MAX_PAYLOAD_BYTES = 1048576   -- 1 MB — NUI messages above this may be silently truncated
 
 function Bridge.send(msgType, payload)
-    local msg = {}
-    for k, v in pairs(payload) do msg[k] = v end
-    msg.type = msgType
+    payload.type = msgType
 
     if Bridge._queue == nil then
         Bridge._queue = {}
@@ -51,7 +49,7 @@ function Bridge.send(msgType, payload)
         end)
     end
 
-    Bridge._queue[#Bridge._queue + 1] = msg
+    Bridge._queue[#Bridge._queue + 1] = payload
 end
 
 -- Registers a NUI callback scoped to a menu. Bridge.removeCallbacks(menu_id)

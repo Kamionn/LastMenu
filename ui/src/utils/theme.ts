@@ -18,7 +18,6 @@ export interface UserSettings {
     modalAlign:     'center' | 'top-center' | 'bottom-center'
     progressPos:    'bottom-center' | 'top-center' | 'bottom-left' | 'bottom-right'
     accentColor:    string | null
-    targetKey:      number
     menuOpacity:    number
     compactMode:    boolean
     menuWidth:      'compact' | 'default' | 'large'
@@ -35,10 +34,15 @@ export interface UserSettings {
     perfMode:       boolean
     borderRadius:   number | null
     themePreset:    string
+    // v4 — user-priority overrides (null = Auto = defer to dev/config)
+    holdDuration:   number | null
+    pageSize:       number | null
+    radialSize:     'compact' | 'normal' | 'large' | null
+    targetSize:     'compact' | 'normal' | 'large' | null
     _v:             number
 }
 
-const SETTINGS_VERSION = 3
+const SETTINGS_VERSION = 4
 
 export const SETTINGS_DEFAULTS: UserSettings = {
     fontSize:       100,
@@ -50,7 +54,6 @@ export const SETTINGS_DEFAULTS: UserSettings = {
     modalAlign:     'center',
     progressPos:    'bottom-center',
     accentColor:    null,
-    targetKey:      36,
     menuOpacity:    97,
     compactMode:    false,
     menuWidth:      'default',
@@ -66,6 +69,10 @@ export const SETTINGS_DEFAULTS: UserSettings = {
     perfMode:       false,
     borderRadius:   null,
     themePreset:    'default',
+    holdDuration:   null,
+    pageSize:       null,
+    radialSize:     null,
+    targetSize:     null,
     _v:             SETTINGS_VERSION,
 }
 
@@ -239,11 +246,17 @@ export function applyTheme(s: UserSettings): void {
     if (accentRaw) {
         root.style.setProperty('--ui-accent', accentRaw)
         root.style.setProperty('--ui-accent-text', '#ffffff')
-        let hex6 = ''
-        if      (/^#[0-9a-fA-F]{6}$/.test(accentRaw)) hex6 = accentRaw.slice(1)
-        else if (/^#[0-9a-fA-F]{3}$/.test(accentRaw)) hex6 = accentRaw[1]+accentRaw[1]+accentRaw[2]+accentRaw[2]+accentRaw[3]+accentRaw[3]
-        if (hex6) {
-            const [r, g, b] = [0, 2, 4].map(i => parseInt(hex6.slice(i, i + 2), 16))
+        let r = -1, g = -1, b = -1
+        if (/^#[0-9a-fA-F]{6}$/.test(accentRaw)) {
+            ;[r, g, b] = [0, 2, 4].map(i => parseInt(accentRaw.slice(i + 1, i + 3), 16))
+        } else if (/^#[0-9a-fA-F]{3}$/.test(accentRaw)) {
+            const h = accentRaw[1]+accentRaw[1]+accentRaw[2]+accentRaw[2]+accentRaw[3]+accentRaw[3]
+            ;[r, g, b] = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16))
+        } else {
+            const m = accentRaw.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/)
+            if (m) { r = +m[1]; g = +m[2]; b = +m[3] }
+        }
+        if (r >= 0) {
             const dim = [r, g, b].map(v => Math.max(0, Math.round(v * 0.88)).toString(16).padStart(2, '0')).join('')
             root.style.setProperty('--ui-accent-dim', '#' + dim)
         }
@@ -329,4 +342,16 @@ export function applyTheme(s: UserSettings): void {
     const VALID_CB = ['none', 'deuteranopia', 'protanopia', 'tritanopia']
     const cb = VALID_CB.includes(s.colorBlind) ? s.colorBlind : 'none'
     root.style.filter = cb !== 'none' ? `url(#lm-${cb})` : ''
+
+    // ── 16. Radial size ───────────────────────────────────────────────────────
+    if (s.radialSize !== null && s.radialSize !== undefined) {
+        const radialSizeMap: Record<string, string> = { compact: '320px', normal: '400px', large: '500px' }
+        root.style.setProperty('--ui-radial-size', radialSizeMap[s.radialSize] ?? '400px')
+    }
+
+    // ── 17. Target menu size ──────────────────────────────────────────────────
+    if (s.targetSize !== null && s.targetSize !== undefined) {
+        const targetSizeMap: Record<string, string> = { compact: '260px', normal: '320px', large: '400px' }
+        root.style.setProperty('--ui-target-width', targetSizeMap[s.targetSize] ?? '320px')
+    }
 }

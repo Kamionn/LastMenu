@@ -1,109 +1,140 @@
 import { untrack } from 'svelte'
 
-function collectStates(items: any[]) {
-    const out: Record<string, any> = {}
+function _flatItems(items: any[]): any[] {
+    const out: any[] = []
     for (const item of items ?? []) {
-        if (item.kind === 'accordion') Object.assign(out, collectStates(item.items))
-        else if (item.kind === 'toggle' || item.kind === 'checkbox') out[item.id] = item.value ?? false
-        else if (item.kind === 'slider') out[item.id] = item.value ?? item.min ?? 0
+        out.push(item)
+        if (item.kind === 'accordion') {
+            for (const sub of item.items ?? []) out.push(sub)
+        }
     }
     return out
 }
 
-export function useTarget(getData: () => any, onCallback: (id: string, extra?: Record<string, any>) => void) {
-    let openAccordions = $state<Set<string>>(untrack(() => new Set(
-        (getData().items ?? []).filter((i: any) => i.kind === 'accordion' && i.open).map((i: any) => i.id)
-    )))
-    let states    = $state<Record<string, any>>(untrack(() => collectStates(getData().items)))
-    let cooldowns = $state<Record<string, number>>({})
-    let _now      = $state(Date.now())
+export function useTarget(getData: () => any, onCallback: (id: string, extra?: any) => void) {
 
-    $effect(() => {
-        if (Object.keys(cooldowns).length === 0) return
-        const iv = setInterval(() => { _now = Date.now() }, 100)
-        return () => clearInterval(iv)
-    })
+    // -- Cooldown tracking
+    const _cdMap = new Map()
+    let _cdTick   = $state(0)
+    let _cdTimer = null
 
-    let holdId       = $state<string | null>(null)
-    let holdProgress = $state(0)
-    let _holdRaf     = 0
+    function _startCdTimer() {
+        if (_cdTimer) return
+        _cdTimer = setInterval(() => {
+            let active = false
+            const now = Date.now()
+            for (const [id, cd] of _cdMap) {
+                if (cd.expiry > now) active = true
+                else _cdMap.delete(id)
+            }
+            _cdTick++
+            if (!active) { clearInterval(_cdTimer); _cdTimer = null }
+        }, 100)
+    }
 
-    function startHold(item: any) {
-        cancelHold()
-        const dur = item.confirm_hold
-        const t0  = performance.now()
-        holdId       = item.id
-        holdProgress = 0
-        const tick = (now: number) => {
-            const p = Math.min(1, (now - t0) / dur)
-            holdProgress = p
-            if (p >= 1) {
-                holdId = null; holdProgress = 0
-                fireCallback(item)
-            } else {
-                _holdRaf = requestAnimationFrame(tick)
+    untrack(() => {
+        for (const item of _flatItems(getData().items ?? [])) {
+            if (item.cd_expiry && item.cooldown) {
+                const remaining = item.cd_expiry - Date.now()
+                if (remaining > 0) _cdMap.set(item.id, { expiry: item.cd_expiry, duration: item.cooldown })
             }
         }
-        _holdRaf = requestAnimationFrame(tick)
+        if (_cdMap.size > 0) _startCdTimer()
+    })
+
+    function isCooling(id) {
+        _cdTick
+        return (_cdMap.get(id)?.expiry ?? 0) > Date.now()
+    }
+
+    function cdRemaining(id) {
+        _cdTick
+        return Math.max(0, (_cdMap.get(id)?.expiry ?? 0) - Date.now())
+    }
+
+    function _startCooldown(item) {
+        if (!item.cooldown) return
+        _cdMap.set(item.id, { expiry: Date.now() + item.cooldown, duration: item.cooldown })
+        _startCdTimer()
+    }
+
+    // -- Stateful items
+    let states = $state(untrack(() => {
+        const init = {}
+        for (const item of _flatItems(getData().items ?? [])) {
+            if (item.kind === 'toggle' || item.kind === 'checkbox') {
+                init[item.id] = item.value ?? false
+            } else if (item.kind === 'slider') {
+                init[item.id] = item.value ?? item.min ?? 0
+            }
+        }
+        return init
+    }))
+
+    function updateState(id, value) { states[id] = value }
+
+    // -- Accordions
+    let openAccordions = $state(untrack(() => {
+        const s = new Set()
+        for (const item of getData().items ?? []) {
+            if (item.kind === 'accordion' && item.open) s.add(item.id)
+        }
+        return s
+    }))
+
+    function toggleAcc(id) {
+        const next = new Set(openAccordions)
+        if (next.has(id)) next.delete(id); else next.add(id)
+        openAccordions = next
+    }
+
+    // -- Hold-to-confirm
+    let holdId       = $state(null)
+    let holdProgress = $state(0)
+    let _holdRAF   = null
+    let _holdStart = null
+
+    function startHold(item) {
+        const duration = (typeof item.confirm_hold === 'number' && item.confirm_hold > 0)
+            ? item.confirm_hold : 1500
+        holdId = item.id; holdProgress = 0; _holdStart = performance.now()
+        function tick(now) {
+            const p = Math.min(1, (now - _holdStart) / duration)
+            holdProgress = p
+            if (p < 1) { _holdRAF = requestAnimationFrame(tick) }
+            else { holdId = null; holdProgress = 0; _holdRAF = null; _executeItem(item) }
+        }
+        _holdRAF = requestAnimationFrame(tick)
     }
 
     function cancelHold() {
-        if (_holdRaf) { cancelAnimationFrame(_holdRaf); _holdRaf = 0 }
-        holdId = null; holdProgress = 0
+        if (_holdRAF) cancelAnimationFrame(_holdRAF)
+        _holdRAF = null; _holdStart = null; holdId = null; holdProgress = 0
     }
 
-    function startCooldown(item: any) {
-        if (!item.cooldown) return
-        const expiry = Date.now() + item.cooldown
-        cooldowns = { ...cooldowns, [item.id]: expiry }
-        setTimeout(() => {
-            const c = { ...cooldowns }
-            delete c[item.id]
-            cooldowns = c
-        }, item.cooldown + 100)
-    }
-
-    const isCooling   = (id: string) => cooldowns[id] != null && _now < cooldowns[id]
-    const cdRemaining = (id: string) => Math.max(0, (cooldowns[id] ?? 0) - _now)
-
-    function fireCallback(item: any, extra: Record<string, any> = {}) {
-        onCallback(item.id, extra)
-        startCooldown(item)
-    }
-
-    function clickItem(item: any) {
-        if (item.disabled || isCooling(item.id)) return
-        if (item.confirm_hold) return
+    // -- Item execution
+    function _executeItem(item) {
         if (item.kind === 'toggle' || item.kind === 'checkbox') {
-            const v = !(states[item.id] ?? false)
-            states = { ...states, [item.id]: v }
-            onCallback(item.id, { value: v })
+            const newVal = !(states[item.id] ?? false)
+            states[item.id] = newVal
+            onCallback(item.id, { value: newVal })
         } else {
-            fireCallback(item)
+            _startCooldown(item)
+            onCallback(item.id)
         }
     }
 
-    function toggleAcc(id: string) {
-        const s = new Set(openAccordions)
-        s.has(id) ? s.delete(id) : s.add(id)
-        openAccordions = s
-    }
-
-    function updateState(id: string, value: any) {
-        states = { ...states, [id]: value }
+    function clickItem(item) {
+        if (item.disabled || isCooling(item.id)) return
+        if (item.confirm_hold) return
+        _executeItem(item)
     }
 
     return {
-        get openAccordions() { return openAccordions },
-        get states()         { return states },
         get holdId()         { return holdId },
         get holdProgress()   { return holdProgress },
-        isCooling,
-        cdRemaining,
-        startHold,
-        cancelHold,
-        clickItem,
-        toggleAcc,
-        updateState,
+        get states()         { return states },
+        get openAccordions() { return openAccordions },
+        isCooling, cdRemaining, startHold, cancelHold, clickItem, toggleAcc, updateState,
     }
 }

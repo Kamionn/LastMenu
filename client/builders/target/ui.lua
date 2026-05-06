@@ -10,6 +10,11 @@ local GenerateMenuId = LastMenu._genId
 local _stableId      = LastMenu._stableId
 local TR             = LastMenu._targetRaycast
 local _resName       = GetCurrentResourceName()
+-- Fallback control ID: RegisterKeyMapping may not fire immediately after a resource restart
+-- (FiveM key-binding refresh is async). IsControlPressed ensures the key is detected while
+-- the mapping propagates. Maps Config.target_key (key-name string) to a GTA control index.
+local _KEY_TO_CTRL   = { LMENU = 19, LCONTROL = 36, LSHIFT = 21, RCONTROL = 70, F1 = 288, F2 = 289 }
+local _cfgHoldKey    = Config.target_key and _KEY_TO_CTRL[Config.target_key:upper()] or 19
 
 -- Module-level state shared between the polling thread and NUI helpers.
 ---@type boolean
@@ -29,14 +34,6 @@ local _targetMenuId   = nil
 rawset(LastMenu, '_targetUi', {
     resetMatchKey = function() _lastMatchKey = '' end,
 })
-
--- ── Hold key ────────────────────────────────────────────────────────────────
-
----@return integer
-local function getHoldKey()
-    local k = LastMenu._userTargetKey
-    return (k and k ~= 0) and k or Config.target_hold_key or 36
-end
 
 -- ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -256,17 +253,18 @@ end
 
 Citizen.CreateThread(function()
     while true do
+        local _stackTop = Stack.peek()
         if next(Target._registrations) == nil then
             if _isReticleShown then closeTarget(); _isReticleShown = false; _lastMatchKey = ''; _idleMoving = nil end
             _prevE = false
             Citizen.Wait(1000)
 
-        elseif Stack.peek() ~= nil and Stack.peek().type ~= 'target' then
+        elseif _stackTop ~= nil and _stackTop.type ~= 'target' then
             if _isReticleShown then closeTarget(); _isReticleShown = false; _lastMatchKey = ''; _idleMoving = nil end
             _prevE = false
             Citizen.Wait(200)
 
-        elseif not IsControlPressed(0, getHoldKey()) then
+        elseif not (LastMenu._targetHeld or (_cfgHoldKey and IsControlPressed(0, _cfgHoldKey))) then
             if _isReticleShown then
                 closeTarget()
                 _isReticleShown = false
@@ -293,13 +291,22 @@ Citizen.CreateThread(function()
         else
             local playerPed    = PlayerPedId()
             local playerCoords = GetEntityCoords(playerPed)
-            local entity       = TR.getRaycastHit(TR.getTargetDist())
+            local maxDist      = TR.getTargetDist()
+            local entity       = TR.getRaycastHit(maxDist)
             local matched      = TR.findMatchingRegs(entity, playerCoords)
 
             local parts = {}
             for _, m in ipairs(matched) do parts[#parts + 1] = m.id end
-            table.sort(parts)
-            local matchKey = table.concat(parts, '|')
+            local matchKey
+            local nParts = #parts
+            if nParts == 0 then
+                matchKey = ''
+            elseif nParts == 1 then
+                matchKey = parts[1]
+            else
+                table.sort(parts)
+                matchKey = table.concat(parts, '|')
+            end
 
             -- on_enter / on_leave
             local currentIds = {}
@@ -350,7 +357,7 @@ Citizen.CreateThread(function()
                 end
                 _prevE = eDown
             else
-                local isMoving = GetEntitySpeed(PlayerPedId()) > 0.5
+                local isMoving = GetEntitySpeed(playerPed) > 0.5
 
                 if _lastMatchKey ~= 'idle' then
                     closeTarget()

@@ -42,22 +42,6 @@ local function _resolveNav(entry)
     return nav
 end
 
-local MAP_CONTROLS = { 199, 200 }
-
--- Suppresses map open/close controls while any menu is on the stack.
-Citizen.CreateThread(function()
-    while true do
-        if #Stack._entries > 0 then
-            for _, ctrl in ipairs(MAP_CONTROLS) do
-                DisableControlAction(0, ctrl, true)
-            end
-            Citizen.Wait(0)
-        else
-            Citizen.Wait(500)
-        end
-    end
-end)
-
 -- Auto-closes the stack when the player walks too far from where the menu opened.
 Citizen.CreateThread(function()
     while true do

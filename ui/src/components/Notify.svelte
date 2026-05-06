@@ -15,8 +15,10 @@
         const id       = data.id ?? Math.random().toString(36).slice(2)
         const entry    = { ...data, id, _start: Date.now(), _duration: duration, _pct: duration > 0 ? 100 : null }
 
-        // group deduplication: replace existing toast with same group
+        // group deduplication: replace existing toast, carry accumulated count
         if (data.group) {
+            const prev = toasts.find(t => t.group === data.group)
+            if (prev) entry._count = (prev._count || 1) + 1
             toasts = toasts.filter(t => t.group !== data.group)
         }
 
@@ -109,8 +111,11 @@
 
                 <!-- Content -->
                 <div class="toast-text">
-                    {#if toast.title}
-                        <div class="toast-title">{toast.title}</div>
+                    {#if toast.title || toast._count > 1}
+                    <div class="toast-title-row">
+                        {#if toast.title}<span class="toast-title">{toast.title}</span>{/if}
+                        {#if toast._count > 1}<span class="toast-count">×{toast._count}</span>{/if}
+                    </div>
                     {/if}
                     <div class="toast-message">{toast.message ?? ''}</div>
                 </div>

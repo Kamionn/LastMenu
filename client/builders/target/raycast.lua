@@ -73,7 +73,7 @@ end
 
 local _ctx = {}
 
-local _zoneDispatch = EasySwitch.new()
+local _zoneDispatch = EasySwitch.new({ safe = true })
     :when('sphere', function()
         if #(_ctx.playerCoords - _ctx.reg.coords) <= _ctx.reg.radius then
             _ctx.matched[#_ctx.matched + 1] = { id = _ctx.id, reg = _ctx.reg, entity = nil }

@@ -42,7 +42,7 @@ export function useRadial(getData: () => any, onCallback: (id: string) => void) 
     let n = $derived(liveButtons.length)
 
     let selectedIndex = $derived.by(() => {
-        if (kbIndex >= 0) return kbIndex
+        if (kbIndex >= 0 && kbIndex < n) return kbIndex
         if (n === 0) return -1
         const dx = mouseX - SIZE / 2
         const dy = mouseY - SIZE / 2
@@ -115,9 +115,14 @@ export function useRadial(getData: () => any, onCallback: (id: string) => void) 
 
     function handleMousemove(e: MouseEvent) {
         if (!containerEl) return
+        // In FiveM's CEF, clientX/Y are in physical viewport pixels while
+        // getBoundingClientRect() returns values in zoom-adjusted layout pixels.
+        // Divide clientX by zoom first to convert to layout space, then subtract
+        // the container's layout-space offset.
+        const zoom = parseFloat(document.documentElement.style.zoom) || 1
         const rect = containerEl.getBoundingClientRect()
-        mouseX  = e.clientX - rect.left
-        mouseY  = e.clientY - rect.top
+        mouseX  = e.clientX / zoom - rect.left
+        mouseY  = e.clientY / zoom - rect.top
         kbIndex = -1
     }
 

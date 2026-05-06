@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: ver
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog notes
+        id: notes
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          # Extract content between ## [VERSION] and the next ## [
+          NOTES=$(awk "/^## \[$VERSION\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md)
+          # Strip leading/trailing blank lines
+          NOTES=$(echo "$NOTES" | sed '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
+          printf 'notes<<EOF\n%s\nEOF\n' "$NOTES" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: ${{ steps.notes.outputs.notes }}
+          draft: false
+          prerelease: false

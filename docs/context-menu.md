@@ -26,7 +26,9 @@ The context menu is the main vertical menu type. It supports a rich set of inter
 4. [Real-time reactive items](#4-real-time-reactive-items)
 5. [Reusable menus](#5-reusable-menus)
 6. [Sub-menus](#6-sub-menus)
-7. [User settings](#7-user-settings)
+7. [Live rebuild (`context_update`)](#7-live-rebuild-context_update)
+8. [User settings](#8-user-settings)
+9. [Security notes](#9-security-notes)
 
 ---
 
@@ -58,6 +60,7 @@ Call these at the top of your builder function, before adding items.
 | `menu:search()` | — | — | Force-show the search bar (auto-shown when items exceed `page_size`) |
 | `menu:page_size(n)` | number | 20 | Items per page (pagination auto-activates above this). Ignored when `scroll()` is set. |
 | `menu:scroll()` | — | — | **1.0.0** Disable pagination — render all items with native scroll. Mutually exclusive with `page_size()`. |
+| `menu:cancelable(v)` | bool | `true` | Set to `false` to prevent Escape / B-button from closing this menu. |
 
 ```lua
 UI:context(function(menu)
@@ -229,9 +232,21 @@ menu:stepper("Repair Kits", {
     max     = 10,
     step    = 1,
     default = 2,
+    suffix  = " kits",
     cb      = function(value) print("Kits:", value) end,
 })
 ```
+
+| Option | Type | Description |
+|---|---|---|
+| `icon` | string | Lucide icon name |
+| `min` | number | Minimum value (default: `0`) |
+| `max` | number | Maximum value (default: `99`) |
+| `step` | number | Increment per step (default: `1`) |
+| `default` | number | Initial value |
+| `suffix` | string | Unit label appended to the value (e.g. `" kits"`, `" m"`) |
+| `id` | string | Stable callback ID |
+| `cb` | function | Called on change: `function(value) end` |
 
 Keyboard: `←` `→` to step.
 
@@ -383,9 +398,22 @@ Three number inputs for day/month/year. Returns an ISO date string (`"YYYY-MM-DD
 menu:date_picker("Review Date", {
     icon    = "calendar",
     default = "2025-06-15",   -- optional, defaults to today
+    min     = "2024-01-01",   -- optional lower bound
+    max     = "2030-12-31",   -- optional upper bound
+    format  = "dmy",          -- 'dmy' (default) | 'mdy' | 'ymd'
     cb      = function(date) print("Date:", date) end,
 })
 ```
+
+| Option | Type | Description |
+|---|---|---|
+| `icon` | string | Lucide icon name |
+| `default` | string | Pre-filled date in `"YYYY-MM-DD"` format (defaults to today) |
+| `min` | string | Minimum selectable date (`"YYYY-MM-DD"`) |
+| `max` | string | Maximum selectable date (`"YYYY-MM-DD"`) |
+| `format` | string | Display order for the three inputs: `'dmy'` (DD/MM/YYYY, default), `'mdy'` (MM/DD/YYYY), `'ymd'` (YYYY/MM/DD) |
+| `id` | string | Stable callback ID |
+| `cb` | function | Called on confirm: `function(date) end` — returns `"YYYY-MM-DD"` |
 
 ---
 
@@ -404,8 +432,14 @@ menu:separator()
 A section label (all-caps, dimmed).
 
 ```lua
-menu:header("Vehicle Stats", { color = "#60a5fa" })
+menu:header("Vehicle Stats", { color = "#60a5fa", align = "left" })
 ```
+
+| Option | Type | Description |
+|---|---|---|
+| `color` | string | Text color override (hex) |
+| `align` | string | Text alignment: `'left'` (default), `'center'`, `'right'` |
+| `id` | string | Stable item ID |
 
 ---
 
@@ -562,21 +596,80 @@ Pressing `Escape` closes the top menu and returns to the parent.
 
 ---
 
-## 7. User settings
+## 7. Live rebuild (`context_update`)
 
-Players can open the **user configurator** at any time by pressing **F12**.
+`context_update` rebuilds the currently visible context menu **without closing and reopening it**. Use it to refresh item lists that aren't covered by individual watchers (e.g., the list changed entirely — new items added/removed, not just field values).
 
-It allows them to set:
-- **Navigation mode** — Mouse only / Keyboard only / Both
-- **Accent color** — 10 presets + custom color picker
-- **Font size** — 80% to 130%
-- **Reset menu position** — returns to default position
+```lua
+local UI = exports['LastMenu']
 
-Settings are saved to `localStorage` and persist between sessions. The developer's `menu:nav('mouse')` / `menu:nav('keyboard')` always takes priority over the user's global setting.
+-- Rebuild the top context menu with a new builder function
+UI:context_update(function(menu)
+    menu:title("Shop")
+    for _, item in ipairs(getUpdatedInventory()) do
+        menu:button(item.name, { badge = item.price .. "€", cb = function() buy(item) end })
+    end
+end)
+```
+
+> Only works when the top of the stack is a context menu. If the stack is empty or the top is a different type, the call is silently ignored.
+
+**When to use `context_update` vs reactive watchers:**
+
+| Situation | Recommended |
+|---|---|
+| A button label/badge/color/visible changes | Watcher (`visible = function()`, `badge = function()`) |
+| The item list itself changes (add/remove items) | `context_update` |
+| Switching "tabs" by reloading the entire menu | `context_update` |
+
+**Handle variant** — `context_build` handles expose the same method scoped to that specific menu (even if it's not on top):
+
+```lua
+local shopHandle = UI:context_build(function(menu)
+    -- ...
+end)
+
+-- Later, rebuild without closing/reopening:
+shopHandle.update(function(menu)
+    menu:title("Shop (refreshed)")
+    -- ...
+end)
+
+-- Or re-run the original builder:
+shopHandle.update()
+```
 
 ---
 
-## 8. Security notes
+## 8. User settings
+
+Players can open the **user configurator** at any time by pressing **F12** (default keybind, rebindable in GTA5 controls).
+
+| Setting | Options | Effect |
+|---|---|---|
+| **Navigation mode** | Mouse only / Keyboard only / Both | Controls how the menu responds to input |
+| **Target key** | Left Ctrl / E / G / Alt | Key used to open target action menus |
+| **Accent color** | 10 presets + custom picker | Changes `--ui-accent` globally |
+| **Menu opacity** | Slider | Changes `--ui-ctx-bg` alpha |
+| **Menu width** | Slider | Changes `--ui-ctx-width` |
+| **Compact mode** | Toggle | Reduces item height (`--ui-ctx-item-height`) |
+| **Blur effect** | Toggle | Enables/disables backdrop-filter |
+| **Font size** | 80% to 130% | Changes `--ui-font-scale` |
+| **UI sounds** | Toggle | Enables/disables click/hover sounds |
+| **Notification position** | 4 quadrants | Toast placement |
+| **Reset position** | Button | Returns menu to default screen position |
+
+Settings are saved to `localStorage` and persist between sessions. The developer's `menu:nav('mouse')` / `menu:nav('keyboard')` always takes priority over the user's global navigation setting.
+
+> Open or close the settings panel programmatically:
+> ```lua
+> exports.LastMenu:settings_open()
+> exports.LastMenu:settings_close()
+> ```
+
+---
+
+## 9. Security notes
 
 **Callbacks are client-side only.** LastMenu emits no network events. Every `cb` function runs in the client Lua context — there is no server-side interaction unless your callback explicitly triggers one (e.g. via `TriggerServerEvent`). This means:
 - No event spoofing risk from LastMenu itself.

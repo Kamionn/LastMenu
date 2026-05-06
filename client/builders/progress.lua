@@ -122,12 +122,14 @@ local function _startSideEffects(id, duration, animData, propData, cbTick, clean
                 local boneIdx = GetEntityBoneIndexByName(ped, bone)
                 bone = boneIdx ~= -1 and GetPedBoneIndex(ped, boneIdx) or 0
             end
-            local ox = propData.offset   and propData.offset.x   or 0.0
-            local oy = propData.offset   and propData.offset.y   or 0.0
-            local oz = propData.offset   and propData.offset.z   or 0.0
-            local rx = propData.rotation and propData.rotation.x or 0.0
-            local ry = propData.rotation and propData.rotation.y or 0.0
-            local rz = propData.rotation and propData.rotation.z or 0.0
+            local ox  = propData.offset and propData.offset.x or 0.0
+            local oy  = propData.offset and propData.offset.y or 0.0
+            local oz  = propData.offset and propData.offset.z or 0.0
+            -- Accept both 'rot' (documented name) and 'rotation' (legacy alias).
+            local rd  = propData.rot or propData.rotation
+            local rx  = rd and rd.x or 0.0
+            local ry  = rd and rd.y or 0.0
+            local rz  = rd and rd.z or 0.0
             local propHandle = CreateObject(modelHash, 0.0, 0.0, 0.0, true, true, false)
             AttachEntityToEntity(propHandle, ped, bone, ox, oy, oz, rx, ry, rz,
                 true, true, false, true, 1, true)

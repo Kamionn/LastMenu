@@ -53,7 +53,7 @@
                 class:is-open={isOpen}
                 aria-expanded={isOpen}
                 onmouseenter={() => ctx.focused = i}
-                onclick={() => ctx.toggleAccordion(item.id)}>
+                onclick={() => { ctx.playSound?.('select'); ctx.toggleAccordion(item.id) }}>
                 {#if item.icon}<span class="btn-icon"><LucideIcon name={item.icon} size={14} /></span>{/if}
                 <span class="btn-label">{item.label}</span>
                 <span class="acc-chevron">{#if isOpen}<ChevronUp size={12} />{:else}<ChevronDown size={12} />{/if}</span>
@@ -189,7 +189,7 @@
                 onmouseup={() => { if (item.confirm_hold) ctx.cancelHold() }}
                 onmouseleave={() => { if (item.confirm_hold) ctx.cancelHold() }}
                 onclick={() => {
-                    if (!item.confirm_hold && !isTimedOut) ctx.onCallback(item.id, { index: idx + 1, value: item.items?.[idx] ?? '' })
+                    if (!item.confirm_hold && !isTimedOut) { ctx.playSound?.('select'); ctx.onCallback(item.id, { index: idx + 1, value: item.items?.[idx] ?? '' }) }
                 }}
                 onkeydown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -279,6 +279,7 @@
                 </div>
                 <button class="color-swatch-btn"
                     onclick={() => {
+                        ctx.playSound?.('select')
                         ctx.openPopover = ctx.openPopover === item.id ? null : item.id
                         if (ctx.openPopover) ctx.colorFocusIdx = presets.indexOf(curColor)
                     }}>
@@ -295,7 +296,7 @@
                                 class:is-selected={curColor === c}
                                 class:is-key-focused={ctx.colorFocusIdx === ci && ctx.effectiveNav !== 'mouse'}
                                 style="background:{ctx.safeCss(c)}"
-                                onclick={() => { ctx.selectColor(item, c); ctx.openPopover = null }}
+                                onclick={() => { ctx.playSound?.('select'); ctx.selectColor(item, c); ctx.openPopover = null }}
                                 title={c}>
                             </button>
                         {/each}
@@ -393,8 +394,8 @@
 
 {#if showPagination}
     <div class="ctx-pager">
-        <button class="pager-btn" onclick={() => { currentPage--; ctx.focused = -1 }} disabled={currentPage===0}><ChevronLeft size={12}/></button>
+        <button class="pager-btn" onclick={() => { ctx.playSound?.('nav'); currentPage--; ctx.focused = -1 }} disabled={currentPage===0}><ChevronLeft size={12}/></button>
         <span class="pager-info">{currentPage+1} / {totalPages}</span>
-        <button class="pager-btn" onclick={() => { currentPage++; ctx.focused = -1 }} disabled={currentPage>=totalPages-1}><ChevronRight size={12}/></button>
+        <button class="pager-btn" onclick={() => { ctx.playSound?.('nav'); currentPage++; ctx.focused = -1 }} disabled={currentPage>=totalPages-1}><ChevronRight size={12}/></button>
     </div>
 {/if}
